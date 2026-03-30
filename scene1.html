@@ -2,7 +2,6 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>角色登入 - 科技任務</title>
 <style>
 @font-face {
@@ -16,7 +15,6 @@ html, body {
   margin: 0;
   padding: 0;
   overflow: hidden;
-  background: #0b0c1a;
 }
 
 body {
@@ -50,7 +48,7 @@ body {
   display: none;
 }
 
-/* 對話框 */
+/* 修正後的對話框 */
 #dialog {
   font-size: 3.5vw;
   height: 15vh;
@@ -104,42 +102,15 @@ body {
 .blink { animation: blink 1s infinite; }
 @keyframes blink { 50% { opacity: 0.3; } }
 
-/* 優化後的 GO 按鈕 */
 #goBtn {
-  display: none; 
-  margin-top: 3vh;
-  padding: 1.8vh 6vw; 
-  font-size: 2.8vw; 
-  font-weight: bold;
-  background: rgba(11, 12, 26, 0.9); 
-  color: #0ff; 
-  border: 2px solid #0ff; 
-  border-radius: 50px; 
-  cursor: pointer;
-  box-shadow: 0 0 1vw #0ff;
-  position: relative;
-  overflow: hidden;
-  transition: all 0.3s ease;
-  letter-spacing: 2px;
-  -webkit-tap-highlight-color: transparent;
+  display: none; margin-top: 2vh;
+  padding: 1.5vh 4vw; font-size: 2.5vw; font-weight: bold;
+  background: #0ff; color: #000; border: none; border-radius: 1vw;
+  cursor: pointer; box-shadow: 0 0 1vw #0ff;
 }
 
-#goBtn:hover {
-  background: #0ff; 
-  color: #000;
-  box-shadow: 0 0 3vw #0ff;
-  transform: scale(1.05);
-}
-
-@keyframes goBreathe {
-  0%, 100% { box-shadow: 0 0 1vw #0ff, inset 0 0 0.5vw #0ff; }
-  50% { box-shadow: 0 0 3vw #0ff, inset 0 0 1vw #0ff; }
-}
-.breathe { animation: goBreathe 2s infinite ease-in-out; }
-
-/* 測試鈕平時隱藏 */
-#testArea { display: none; margin-top: 2vh; }
-#testBtn { padding: 1vh 2vw; font-size: 1.5vw; background: rgba(0,255,255,0.2); color: #0ff; border: 1px solid #0ff; border-radius: 5px; cursor: pointer; }
+#testArea { position: absolute; bottom: 2vh; width: 100%; }
+#testBtn { padding: 1vh 2vw; font-size: 1.5vw; background: rgba(0,255,255,0.2); color: #0ff; border: 1px solid #0ff; border-radius: 5px; cursor: pointer; margin: 0 10px; }
 </style>
 </head>
 <body>
@@ -164,11 +135,11 @@ body {
   </div>
 </div>
 
-<button id="goBtn" class="breathe" onclick="goNext()">GO!!!</button>
+<button id="goBtn" onclick="goNext()">GO!!!</button>
 
 <div id="testArea">
-  <button id="testBtn" onclick="scanCard('maoqiu')">手動：刷毛球</button>
-  <button id="testBtn" onclick="scanCard('hachu')">手動：刷哈啾</button>
+  <button id="testBtn" onclick="scanCard('maoqiu')">測試：刷毛球</button>
+  <button id="testBtn" onclick="scanCard('hachu')">測試：刷哈啾</button>
 </div>
 
 <audio id="scanSound" src="music/scan.mp3"></audio>
@@ -193,13 +164,10 @@ const pigStarImg = document.getElementById("pigStarImg");
 const piggyImg = document.getElementById("piggyImg");
 const names = {maoqiu:"毛球", hachu:"哈啾"};
 
-// 網址參數判斷
-const urlParams = new URLSearchParams(window.location.search);
-const isCommander = urlParams.get('start') === 'commander';
-
 function wait(ms){ return new Promise(r=>setTimeout(r,ms)); }
 
-async function typeText(text, speed=120){
+// 修改後的打字機函式：速度改為 150ms (更慢)
+async function typeText(text, speed=150){
   dialog.innerHTML = "<span></span>"; 
   const target = dialog.querySelector("span");
   for(let i=0; i<text.length; i++){
@@ -209,56 +177,30 @@ async function typeText(text, speed=120){
   }
 }
 
-// NFC 監聽
-async function initNFC() {
-  if ("NDEFReader" in window) {
-    try {
-      const ndef = new NDEFReader();
-      await ndef.scan();
-      ndef.onreading = ({ message }) => {
-        for (const record of message.records) {
-          const textDecoder = new TextDecoder(record.encoding);
-          const scannedId = textDecoder.decode(record.data).trim();
-          if (names[scannedId] && !team.includes(scannedId) && calling) {
-            if (navigator.vibrate) navigator.vibrate(200);
-            scanCard(scannedId);
-          }
-        }
-      };
-    } catch (error) {
-      console.log("NFC Error: " + error);
-    }
-  } else {
-    // 不支援 NFC 時顯示測試按鈕供備用
-    document.getElementById("testArea").style.display = "block";
-  }
-}
-
 async function startStory(){ 
-  // 開始劇情時震動一短一長
-  if (navigator.vibrate) navigator.vibrate([100, 50, 200]);
-
+  // Part 1: 緊急任務
   pigStarImg.style.display = "block";
   for(let i=0;i<3;i++){
     dialog.innerHTML=`<div class="alert-text" style="margin-top:2vh">緊急任務!!! 緊急任務!!!</div>`;
     await wait(600); dialog.innerHTML = "<span></span>"; await wait(400);
   }
   
-  await typeText("我們將製作一個蛋糕🎂\n幫小豬慶生", 120); 
+  // Part 2 & 3: 字幕速度改為 150
+  await typeText("我們將製作一個蛋糕🎂\n幫小豬慶生", 150); 
   await wait(1200);
-  await typeText("現在要呼叫兩位重要隊員來完成!!!", 120); 
+  await typeText("現在要呼叫兩位重要隊員來完成!!!", 150); 
   await wait(1200);
 
+  // Part 4: 呼叫循環
   pigStarImg.style.display = "none";
   piggyImg.style.display = "block";
   cardArea.style.display = "block";
   calling = true;
   dialog.classList.add("scanning-text");
   
-  initNFC(); // 進入呼叫狀態啟動 NFC 監聽
-  
   while(calling){
-    await typeText("呼叫中...呼叫中...", 120);
+    // 呼叫中字樣的速度也改為 150
+    await typeText("呼叫中...呼叫中...", 150);
     await wait(800);
     if(!calling) break;
     dialog.innerHTML = "<span></span>"; 
@@ -271,7 +213,7 @@ function scanCard(id){
   team.push(id);
   
   const sfx = document.getElementById("scanSound");
-  if(sfx) sfx.play().catch(e => console.log("Audio deferred"));
+  if(sfx) sfx.play().catch(e => console.log("Audio play deferred"));
 
   let target = team.length===1 ? "card1" : "card2";
   let card = document.getElementById(target);
@@ -288,25 +230,15 @@ function scanCard(id){
     calling = false;
     dialog.classList.remove("scanning-text");
     dialog.innerHTML = "<span></span>";
-    setTimeout(() => typeText("招集完畢 準備上工", 120), 500);
+    // 最後一段話的速度同步改為 150
+    setTimeout(() => typeText("招集完畢 準備上工", 150), 500);
     document.getElementById("goBtn").style.display = "inline-block";
   }
 }
 
 function goNext(){ alert("任務啟動！"); }
 
-// 入口判斷
-window.onload = () => {
-  if (isCommander) {
-    startStory();
-  } else {
-    dialog.innerHTML = `<div style="color:#0ff; cursor:pointer; font-size:2.5vw;">請感應【豬豬指揮官】以啟動任務<br>(或點擊此處啟動)</div>`;
-    dialog.onclick = () => {
-      dialog.onclick = null;
-      startStory();
-    };
-  }
-};
+startStory();
 </script>
 
 </body>

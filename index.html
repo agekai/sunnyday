@@ -8,14 +8,12 @@
 /* 1. 定義字體 */
 @font-face {
   font-family: 'ChenYuluoyan';
-  /* 確保路徑正確，若在手機上測試，建議確認字型檔案是否已上傳至該路徑 */
   src: url('fonts/ChenYuluoyan-2.0-Thin.ttf') format('truetype');
 }
 
 html, body {
   width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden;
   background: #0b0c1a; color: #fff; 
-  /* 全域套用字體 */
   font-family: 'ChenYuluoyan', 'Microsoft JhengHei', sans-serif;
 }
 
@@ -24,12 +22,11 @@ body {
   display: flex; flex-direction: column; justify-content: flex-start; align-items: center;
 }
 
-/* 確保所有輸入框與按鈕都繼承手寫字體 */
 input, button, select, textarea {
   font-family: 'ChenYuluoyan', 'Microsoft JhengHei', sans-serif;
 }
 
-/* 星空背景 */
+/* --- 星空背景 --- */
 #stars { 
   position: fixed; width: 100%; height: 100%; overflow: hidden; 
   top: 0; left: 0; z-index: 0; pointer-events: none;
@@ -43,7 +40,7 @@ input, button, select, textarea {
   50% { opacity: 1; transform: scale(1.2); }
 }
 
-/* 登入遮罩 */
+/* --- 登入遮罩 --- */
 #startOverlay {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
   background: rgba(11, 12, 26, 0.98); z-index: 100;
@@ -56,16 +53,13 @@ input, button, select, textarea {
   box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
   text-align: center; width: 85%; max-width: 320px;
 }
-.login-box h2 { 
-  color: #0ff; font-size: clamp(24px, 6vw, 32px); margin-bottom: 10px; letter-spacing: 2px; 
-}
+.login-box h2 { color: #0ff; font-size: clamp(24px, 6vw, 32px); margin-bottom: 10px; letter-spacing: 2px; }
 .hint { color: #aaa; font-size: 16px; margin-bottom: 20px; }
 
 #passInput {
   width: 80%; background: transparent; border: none; border-bottom: 2px solid #0ff;
   color: #0ff; font-size: 32px; text-align: center; letter-spacing: 10px;
   outline: none; margin-bottom: 25px;
-  /* 密碼數字部分若要維持手寫感，也要確認字體支援數字 */
 }
 #loginBtn {
   background: #0ff; color: #000; border: none; padding: 12px 40px;
@@ -81,7 +75,7 @@ input, button, select, textarea {
   75% { transform: translateX(10px); }
 }
 
-/* 劇情內容區 */
+/* --- 劇情內容區 --- */
 #imageStage { 
   margin-top: 4vh; width: 100%; height: 25vh; 
   display: flex; justify-content: center; align-items: center; position: relative; z-index: 1; 
@@ -101,25 +95,77 @@ input, button, select, textarea {
 }
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
 
+/* --- 隊員卡片區 --- */
 #cardArea { 
   display: none; margin-top: 1vh; position: relative; z-index: 1; text-align: center; width: 100%;
 }
+
 .team-card {
   display: inline-block; width: 28vw; max-width: 150px; height: 38vw; max-height: 200px;
-  margin: 10px; border-radius: 15px; border: 2px solid #0ff;
-  background: rgba(26, 28, 51, 0.8); box-shadow: 0 0 15px rgba(0,255,255,0.3);
-  position: relative; overflow: hidden; animation: float 3s infinite ease-in-out;
+  margin: 10px; border-radius: 15px; 
+  border: 2px dashed rgba(0, 255, 255, 0.3); /* 初始虛線 */
+  background: rgba(26, 28, 51, 0.4); 
+  position: relative; overflow: hidden; 
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
-@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+/* 掃描線動畫 */
+.scan-bar {
+  position: absolute; left: 0; width: 100%; height: 5px;
+  background: linear-gradient(to bottom, transparent, #0ff, transparent);
+  box-shadow: 0 0 15px #0ff;
+  z-index: 5;
+  display: none;
+}
+
+.team-card.scanning .scan-bar {
+  display: block;
+  animation: scanMove 1.2s ease-in-out forwards;
+}
+
+@keyframes scanMove {
+  0% { top: -10%; opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { top: 110%; opacity: 0; }
+}
+
+/* 激活狀態 (掃描後) */
+.team-card.active {
+  border: 2px solid #0ff; /* 變實線 */
+  background: rgba(26, 28, 51, 0.9);
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+  animation: float 3s infinite ease-in-out;
+}
 
 .card-body { height: 75%; display: flex; justify-content: center; align-items: center; }
-.card-body img { width: 85%; opacity: 0; transition: opacity 0.8s; }
-.card-footer { 
-  background: rgba(0, 255, 255, 0.2); font-size: 18px; padding: 5px 0; color: #0ff; font-weight: bold;
+.card-body img { 
+  width: 85%; 
+  opacity: 0; 
+  /* 初始：黑影 + 位移 */
+  filter: brightness(0) drop-shadow(0 0 2px #0ff);
+  transform: translateY(20px);
+  transition: opacity 0.5s, filter 1.5s ease, transform 1s ease; 
 }
+
+/* 激活後的圖片：變色 + 上浮 */
+.team-card.active .card-body img {
+  opacity: 1;
+  filter: brightness(1) drop-shadow(0 0 10px #0ff);
+  transform: translateY(0);
+}
+
+.card-footer { 
+  background: rgba(0, 255, 255, 0.1); font-size: 18px; padding: 5px 0; color: #0ff; font-weight: bold;
+  transition: background 0.5s;
+}
+.team-card.active .card-footer { background: rgba(0, 255, 255, 0.3); }
+
 .blink { animation: blink 1s infinite; }
 @keyframes blink { 50% { opacity: 0.3; } }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
 
+/* --- 按鈕 --- */
 #goBtn {
   display: none; margin-top: 2vh; padding: 15px 50px; 
   font-size: 22px; font-weight: bold;
@@ -156,8 +202,16 @@ input, button, select, textarea {
 <div id="dialog"></div>
 
 <div id="cardArea">
-  <div id="card1" class="team-card waiting"><div class="card-body"></div><div class="card-footer blink">---</div></div>
-  <div id="card2" class="team-card waiting"><div class="card-body"></div><div class="card-footer blink">---</div></div>
+  <div id="card1" class="team-card waiting">
+    <div class="scan-bar"></div>
+    <div class="card-body"></div>
+    <div class="card-footer blink">---</div>
+  </div>
+  <div id="card2" class="team-card waiting">
+    <div class="scan-bar"></div>
+    <div class="card-body"></div>
+    <div class="card-footer blink">---</div>
+  </div>
 </div>
 
 <button id="goBtn" class="breathe" onclick="goNext()">GO!!!</button>
@@ -165,13 +219,12 @@ input, button, select, textarea {
 <div id="testArea">
   <button class="testBtn" onclick="scanCard('maoqiu')">手動：毛球</button>
   <button class="testBtn" onclick="scanCard('hachu')">手動：哈啾</button>
-  <button class="testBtn" style="background: rgba(255,77,77,0.3); border-color: #ff4d4d;" onclick="location.reload()">模擬：指揮官刷卡(重整)</button>
+  <button class="testBtn" style="background: rgba(255,77,77,0.3); border-color: #ff4d4d;" onclick="location.reload()">模擬：指揮官重整</button>
 </div>
 
 <audio id="scanSound" src="music/scan.mp3"></audio>
 
 <script>
-// JavaScript 邏輯保持不變，維持你的 NFC 偵測與劇情流程
 function createStars() {
   const starsDiv = document.getElementById('stars');
   starsDiv.innerHTML = '';
@@ -268,7 +321,6 @@ async function startStory() {
   calling = true;
   
   while(calling) {
-    dialog.className = "scanning-text";
     await typeText("呼叫中...呼叫中...", 100);
     await wait(800);
     if(!calling) break;
@@ -294,23 +346,38 @@ function scanCard(id) {
   if(sfx) sfx.play().catch(e => {});
   
   let card = document.getElementById(team.length === 1 ? "card1" : "card2");
-  card.classList.remove("waiting");
-  card.querySelector(".card-footer").innerText = names[id];
-  card.querySelector(".card-footer").classList.remove("blink");
   
+  // 觸發掃描狀態
+  card.classList.add("scanning");
+  card.querySelector(".card-footer").innerText = "掃描中...";
+
+  // 放入圖片 (此時 CSS 會讓它是黑影且在下方)
   let img = document.createElement("img");
   img.src = `images/characters/${id}.png`;
   card.querySelector(".card-body").appendChild(img);
-  setTimeout(() => img.style.opacity = 1, 50);
+  setTimeout(() => { img.style.opacity = 1; }, 50);
 
-  if(team.length === 2) {
-    calling = false;
-    const dialog = document.getElementById("dialog");
-    dialog.className = ""; 
-    dialog.innerHTML = "";
-    setTimeout(() => typeText("招集完畢 準備上工", 100), 500);
+  // 1.2秒後掃描結束，啟動實體化
+  setTimeout(() => {
+    card.classList.remove("scanning", "waiting");
+    card.classList.add("active");
+    card.querySelector(".card-footer").innerText = names[id];
+    card.querySelector(".card-footer").classList.remove("blink");
+    
+    if(team.length === 2) {
+      calling = false;
+      finishEnroll();
+    }
+  }, 1200);
+}
+
+function finishEnroll() {
+  const dialog = document.getElementById("dialog");
+  dialog.innerHTML = "";
+  setTimeout(() => {
+    typeText("召集完畢！準備上工！", 100);
     document.getElementById("goBtn").style.display = "inline-block";
-  }
+  }, 500);
 }
 
 function goNext() { alert("任務啟動！"); }

@@ -5,19 +5,28 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>角色登入 - 科技任務</title>
 <style>
+/* 1. 定義字體 */
 @font-face {
   font-family: 'ChenYuluoyan';
+  /* 確保路徑正確，若在手機上測試，建議確認字型檔案是否已上傳至該路徑 */
   src: url('fonts/ChenYuluoyan-2.0-Thin.ttf') format('truetype');
 }
 
 html, body {
   width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden;
-  background: #0b0c1a; color: #fff; font-family: 'ChenYuluoyan', 'Microsoft JhengHei', sans-serif;
+  background: #0b0c1a; color: #fff; 
+  /* 全域套用字體 */
+  font-family: 'ChenYuluoyan', 'Microsoft JhengHei', sans-serif;
 }
 
 body {
   background: radial-gradient(ellipse at center, #0b0c1a 0%, #1a1c33 100%);
   display: flex; flex-direction: column; justify-content: flex-start; align-items: center;
+}
+
+/* 確保所有輸入框與按鈕都繼承手寫字體 */
+input, button, select, textarea {
+  font-family: 'ChenYuluoyan', 'Microsoft JhengHei', sans-serif;
 }
 
 /* 星空背景 */
@@ -55,12 +64,16 @@ body {
 #passInput {
   width: 80%; background: transparent; border: none; border-bottom: 2px solid #0ff;
   color: #0ff; font-size: 32px; text-align: center; letter-spacing: 10px;
-  outline: none; margin-bottom: 25px; font-family: sans-serif;
+  outline: none; margin-bottom: 25px;
+  /* 密碼數字部分若要維持手寫感，也要確認字體支援數字 */
 }
 #loginBtn {
   background: #0ff; color: #000; border: none; padding: 12px 40px;
   border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 20px;
+  transition: all 0.2s;
 }
+#loginBtn:active { transform: scale(0.95); background: #00cccc; }
+
 .error-shake { animation: shake 0.3s; border-bottom-color: #ff4d4d !important; }
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
@@ -129,7 +142,7 @@ body {
     <p class="hint">密碼提示: sunnyday</p>
     <input type="password" id="passInput" placeholder="****" inputmode="numeric" maxlength="4">
     <br>
-    <button id="loginBtn" onclick="checkPass()">解鎖任務</button>
+    <button id="loginBtn" onclick="checkPass()">登入任務</button>
   </div>
 </div>
 
@@ -158,7 +171,7 @@ body {
 <audio id="scanSound" src="music/scan.mp3"></audio>
 
 <script>
-// 初始化星空
+// JavaScript 邏輯保持不變，維持你的 NFC 偵測與劇情流程
 function createStars() {
   const starsDiv = document.getElementById('stars');
   starsDiv.innerHTML = '';
@@ -176,7 +189,6 @@ function createStars() {
 }
 createStars();
 
-// 核心功能：啟動時立即監聽 NFC (確保任何時候刷指揮官卡都能重整)
 initNFC();
 
 let team = [];
@@ -215,16 +227,11 @@ async function initNFC() {
         for (const record of message.records) {
           const textDecoder = new TextDecoder(record.encoding || "utf-8");
           const rawData = textDecoder.decode(record.data).toLowerCase();
-
-          // --- 判斷 1：如果是 URL 紀錄 (你的指揮官卡) ---
-          // 因為你的指揮官卡是寫入 URL 用來開啟網頁的，刷入時 recordType 會是 "url"
           if (record.recordType === "url") {
-            if (navigator.vibrate) navigator.vibrate(500); // 長震動提示
-            location.reload(); // 執行重新整理
+            if (navigator.vibrate) navigator.vibrate(500);
+            location.reload();
             return;
           }
-
-          // --- 判斷 2：如果是 Text 紀錄 (你的隊員卡) ---
           const matchedId = Object.keys(names).find(id => rawData.includes(id));
           if (matchedId && !team.includes(matchedId) && calling) {
             if (navigator.vibrate) navigator.vibrate(200);

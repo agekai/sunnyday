@@ -21,11 +21,20 @@ body {
 }
 
 /* 星空背景 */
-#stars { position: fixed; width: 100%; height: 100%; overflow: hidden; top: 0; left: 0; z-index: 0; pointer-events: none; }
-.star { position: absolute; background: white; border-radius: 50%; box-shadow: 0 0 3px #fff; animation: starTwinkle linear infinite; }
-@keyframes starTwinkle { 0%, 100% { opacity: 0.2; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.2); } }
+#stars { 
+  position: fixed; width: 100%; height: 100%; overflow: hidden; 
+  top: 0; left: 0; z-index: 0; pointer-events: none;
+}
+.star { 
+  position: absolute; background: white; border-radius: 50%; 
+  box-shadow: 0 0 3px #fff; animation: starTwinkle linear infinite; 
+}
+@keyframes starTwinkle { 
+  0%, 100% { opacity: 0.2; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
 
-/* 登入與授權遮罩 */
+/* 登入遮罩 */
 #startOverlay {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
   background: rgba(11, 12, 26, 0.98); z-index: 100;
@@ -38,43 +47,50 @@ body {
   box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
   text-align: center; width: 85%; max-width: 320px;
 }
-.login-box h2 { color: #0ff; font-size: clamp(24px, 6vw, 32px); margin-bottom: 10px; letter-spacing: 2px; }
-.hint { color: #aaa; font-size: 16px; margin-bottom: 20px; line-height: 1.4; }
+.login-box h2 { 
+  color: #0ff; font-size: clamp(24px, 6vw, 32px); margin-bottom: 10px; letter-spacing: 2px; 
+}
+.hint { color: #aaa; font-size: 16px; margin-bottom: 20px; }
 
 #passInput {
   width: 80%; background: transparent; border: none; border-bottom: 2px solid #0ff;
   color: #0ff; font-size: 32px; text-align: center; letter-spacing: 10px;
   outline: none; margin-bottom: 25px; font-family: sans-serif;
 }
-
-.btn-group { display: flex; flex-direction: column; gap: 12px; align-items: center; }
-
-.action-btn {
-  width: 100%; background: #0ff; color: #000; border: none; padding: 12px 0;
+#loginBtn {
+  background: #0ff; color: #000; border: none; padding: 12px 40px;
   border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 20px;
-  transition: transform 0.2s;
 }
-.action-btn:active { transform: scale(0.95); }
-
-.secondary-btn {
-  background: transparent; color: #aaa; border: 1px solid #555; padding: 8px 20px;
-  border-radius: 5px; cursor: pointer; font-size: 14px; text-decoration: underline;
-}
-
 .error-shake { animation: shake 0.3s; border-bottom-color: #ff4d4d !important; }
-@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
 
-/* 劇情樣式 (略作微調以適應大字體) */
-#imageStage { margin-top: 4vh; width: 100%; height: 25vh; display: flex; justify-content: center; align-items: center; position: relative; z-index: 1; }
+/* 劇情內容區 */
+#imageStage { 
+  margin-top: 4vh; width: 100%; height: 25vh; 
+  display: flex; justify-content: center; align-items: center; position: relative; z-index: 1; 
+}
 #imageStage img { width: 40vw; max-width: 220px; display: none; filter: drop-shadow(0 0 10px #0ff); }
+
 #dialog {
-  font-size: clamp(20px, 5.5vw, 28px); height: 18vh; display: flex; align-items: center; justify-content: center;
+  font-size: clamp(20px, 5.5vw, 28px); 
+  height: 18vh; display: flex; align-items: center; justify-content: center;
   white-space: pre-wrap; line-height: 1.5; text-shadow: 0 0 8px #0ff;
   text-align: center; width: 90%; margin: 0 auto; position: relative; z-index: 1;
 }
-.alert-text { font-size: clamp(24px, 7vw, 32px); font-weight: bold; color: #ff4d4d; text-shadow: 0 0 15px #ff4d4d; }
 
-#cardArea { display: none; margin-top: 1vh; position: relative; z-index: 1; text-align: center; width: 100%; }
+.alert-text { 
+  font-size: clamp(24px, 7vw, 32px); font-weight: bold; color: #ff4d4d; 
+  text-shadow: 0 0 15px #ff4d4d; animation: pulse 0.5s infinite;
+}
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+
+#cardArea { 
+  display: none; margin-top: 1vh; position: relative; z-index: 1; text-align: center; width: 100%;
+}
 .team-card {
   display: inline-block; width: 28vw; max-width: 150px; height: 38vw; max-height: 200px;
   margin: 10px; border-radius: 15px; border: 2px solid #0ff;
@@ -82,62 +98,60 @@ body {
   position: relative; overflow: hidden; animation: float 3s infinite ease-in-out;
 }
 @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
 .card-body { height: 75%; display: flex; justify-content: center; align-items: center; }
 .card-body img { width: 85%; opacity: 0; transition: opacity 0.8s; }
-.card-footer { background: rgba(0, 255, 255, 0.2); font-size: 18px; padding: 5px 0; color: #0ff; font-weight: bold; }
+.card-footer { 
+  background: rgba(0, 255, 255, 0.2); font-size: 18px; padding: 5px 0; color: #0ff; font-weight: bold;
+}
 .blink { animation: blink 1s infinite; }
 @keyframes blink { 50% { opacity: 0.3; } }
 
 #goBtn {
-  display: none; margin-top: 2vh; padding: 15px 50px; font-size: 22px; font-weight: bold;
+  display: none; margin-top: 2vh; padding: 15px 50px; 
+  font-size: 22px; font-weight: bold;
   background: #000; color: #0ff; border: 3px solid #0ff; border-radius: 50px;
-  cursor: pointer; box-shadow: 0 0 15px #0ff; transition: all 0.3s ease; letter-spacing: 4px; position: relative; z-index: 2;
+  cursor: pointer; box-shadow: 0 0 15px #0ff; transition: all 0.3s ease; 
+  letter-spacing: 4px; position: relative; z-index: 2;
 }
 .breathe { animation: goBreathe 2s infinite ease-in-out; }
 @keyframes goBreathe { 0%, 100% { transform: scale(1); box-shadow: 0 0 15px #0ff; } 50% { transform: scale(1.05); box-shadow: 0 0 30px #0ff; } }
 
 #testArea { display: none; position: fixed; bottom: 15px; z-index: 10; width: 100%; text-align: center; }
-.testBtn { padding: 10px 20px; background: rgba(0,255,255,0.2); border: 1px solid #0ff; color: #0ff; border-radius: 5px; margin: 5px; font-size: 14px; cursor: pointer; }
+.testBtn { padding: 10px 20px; background: rgba(0,255,255,0.2); border: 1px solid #0ff; color: #0ff; border-radius: 5px; margin: 5px; font-size: 14px; }
 </style>
 </head>
 <body>
 
 <div id="startOverlay">
-  <div id="stepPassword" class="login-box">
+  <div class="login-box">
     <h2>身份驗證</h2>
     <p class="hint">密碼提示: sunnyday</p>
     <input type="password" id="passInput" placeholder="****" inputmode="numeric" maxlength="4">
     <br>
-    <div class="btn-group">
-      <button class="action-btn" onclick="checkPass()">解鎖任務</button>
-    </div>
-  </div>
-
-  <div id="stepNFC" class="login-box" style="display: none;">
-    <h2>系統設定</h2>
-    <p class="hint">是否開啟偵測功能？<br><small>(若關閉則需使用手動點擊模式)</small></p>
-    <div class="btn-group">
-      <button class="action-btn" onclick="handleNFCSelection(true)">是，開啟偵測</button>
-      <button class="secondary-btn" onclick="handleNFCSelection(false)">否，暫不開啟</button>
-    </div>
+    <button id="loginBtn" onclick="checkPass()">解鎖任務</button>
   </div>
 </div>
 
 <div id="stars"></div>
+
 <div id="imageStage">
   <img id="pigStarImg" src="images/characters/pigstar.png">
   <img id="piggyImg" src="images/characters/pigpig.png">
 </div>
+
 <div id="dialog"></div>
+
 <div id="cardArea">
   <div id="card1" class="team-card waiting"><div class="card-body"></div><div class="card-footer blink">---</div></div>
   <div id="card2" class="team-card waiting"><div class="card-body"></div><div class="card-footer blink">---</div></div>
 </div>
+
 <button id="goBtn" class="breathe" onclick="goNext()">GO!!!</button>
 
 <div id="testArea">
-  <button class="testBtn" onclick="scanCard('maoqiu')">模擬：毛球</button>
-  <button class="testBtn" onclick="scanCard('hachu')">模擬：哈啾</button>
+  <button class="testBtn" onclick="scanCard('maoqiu')">手動：毛球</button>
+  <button class="testBtn" onclick="scanCard('hachu')">手動：哈啾</button>
 </div>
 
 <audio id="scanSound" src="music/scan.mp3"></audio>
@@ -166,13 +180,46 @@ let calling = false;
 const names = { maoqiu: "毛球", hachu: "哈啾" };
 const wait = ms => new Promise(r => setTimeout(r, ms));
 
+// 修改後的驗證函式：確保 NFC 掃描是由點擊行為直接觸發
 async function checkPass() {
   const input = document.getElementById("passInput");
+  const overlay = document.getElementById("startOverlay");
+
   if (input.value === "0411") {
+    // 立即啟動 NFC 掃描請求 (系統會在此時跳出原生詢問視窗)
+    if ("NDEFReader" in window) {
+      try {
+        const ndef = new NDEFReader();
+        await ndef.scan(); // 必須在使用者點擊的回呼函式中立即執行
+        
+        ndef.onreading = ({ message }) => {
+          if (!calling) return;
+          const textDecoder = new TextDecoder();
+          for (const record of message.records) {
+            const rawData = textDecoder.decode(record.data).toLowerCase();
+            const matchedId = Object.keys(names).find(id => rawData.includes(id));
+            if (matchedId && !team.includes(matchedId)) {
+              if (navigator.vibrate) navigator.vibrate(200);
+              scanCard(matchedId);
+            }
+          }
+        };
+      } catch (error) {
+        console.warn("NFC 被拒絕或不支援: ", error);
+        document.getElementById("testArea").style.display = "block";
+      }
+    } else {
+      document.getElementById("testArea").style.display = "block";
+    }
+
+    // 處理 UI 隱藏與動畫啟動
+    overlay.style.opacity = "0";
+    setTimeout(() => overlay.style.display = "none", 500);
     if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
-    document.getElementById("stepPassword").style.display = "none";
-    document.getElementById("stepNFC").style.display = "block";
+    
+    startStory(); 
   } else {
+    // 密碼錯誤
     input.classList.add("error-shake");
     if (navigator.vibrate) navigator.vibrate(200);
     setTimeout(() => {
@@ -182,54 +229,9 @@ async function checkPass() {
   }
 }
 
-// 處理 NFC 選擇邏輯
-async function handleNFCSelection(useNFC) {
-  const overlay = document.getElementById("startOverlay");
-  
-  if (useNFC) {
-    await initNFC();
-  } else {
-    // 使用者按「否」，強制顯示手動模擬按鈕
-    document.getElementById("testArea").style.display = "block";
-    console.log("使用者選擇不開啟 NFC");
-  }
-  
-  // 進入劇情
-  overlay.style.opacity = "0";
-  setTimeout(() => {
-    overlay.style.display = "none";
-    startStory();
-  }, 500);
-}
-
 document.getElementById("passInput").addEventListener("keypress", (e) => {
   if (e.key === "Enter") checkPass();
 });
-
-async function initNFC() {
-  if ("NDEFReader" in window) {
-    try {
-      const ndef = new NDEFReader();
-      await ndef.scan();
-      ndef.onreading = ({ message }) => {
-        for (const record of message.records) {
-          const textDecoder = new TextDecoder(record.encoding);
-          const rawData = textDecoder.decode(record.data).toLowerCase();
-          const matchedId = Object.keys(names).find(id => rawData.includes(id));
-          if (matchedId && !team.includes(matchedId) && calling) {
-            if (navigator.vibrate) navigator.vibrate(200);
-            scanCard(matchedId);
-          }
-        }
-      };
-    } catch (e) {
-      // 雖然使用者按是，但硬體不支援或報錯，顯示手動按鈕
-      document.getElementById("testArea").style.display = "block";
-    }
-  } else {
-    document.getElementById("testArea").style.display = "block";
-  }
-}
 
 async function startStory() {
   const dialog = document.getElementById("dialog");
@@ -252,7 +254,6 @@ async function startStory() {
   calling = true;
   
   while(calling) {
-    dialog.className = "scanning-text";
     await typeText("呼叫中...呼叫中...", 100);
     await wait(800);
     if(!calling) break;
@@ -265,8 +266,8 @@ async function typeText(text, speed) {
   dialog.innerHTML = "<span></span>";
   const target = dialog.querySelector("span");
   for(let char of text) {
-    target.innerHTML += char;
     if(!calling && text.includes("呼叫中")) return;
+    target.innerHTML += char;
     await wait(speed);
   }
 }
@@ -290,7 +291,6 @@ function scanCard(id) {
   if(team.length === 2) {
     calling = false;
     const dialog = document.getElementById("dialog");
-    dialog.className = ""; 
     dialog.innerHTML = "";
     setTimeout(() => typeText("招集完畢 準備上工", 100), 500);
     document.getElementById("goBtn").style.display = "inline-block";

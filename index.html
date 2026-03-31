@@ -24,32 +24,47 @@ body {
 .star { position:absolute; width:2px; height:2px; background:white; border-radius:50%; animation: starTwinkle linear infinite; }
 @keyframes starTwinkle { 0%{opacity:0.3;transform:translateY(0);} 50%{opacity:1;} 100%{opacity:0.3;transform:translateY(-20px);} }
 
-/* 圖片 Stage */
+/* 啟動遮罩：特務風格 */
+#startOverlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(11, 12, 26, 0.98); z-index: 100;
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  cursor: pointer; transition: opacity 0.5s;
+}
+
+/* 模擬掃描環 */
+.scanner-ring {
+  width: 150px; height: 150px;
+  border: 2px solid #0ff; border-radius: 50%;
+  display: flex; justify-content: center; align-items: center;
+  position: relative; margin-bottom: 30px;
+  box-shadow: 0 0 15px #0ff;
+}
+.scanner-ring::after {
+  content: ""; width: 100%; height: 2px; background: #0ff;
+  position: absolute; animation: scanLine 2s infinite linear;
+  box-shadow: 0 0 10px #0ff;
+}
+@keyframes scanLine { 0% { top: 0; } 100% { top: 100%; } }
+
+.start-hint { 
+  color: #0ff; font-size: 4vw; letter-spacing: 3px;
+  text-align: center; line-height: 1.5;
+}
+
+/* 劇情內容樣式 (維持原樣) */
 #imageStage { margin-top: 5vh; margin-bottom: 5vh; width: 100%; height: 28vh; display: flex; justify-content: center; align-items: center; }
 #imageStage img { width: 35vw; max-width: 250px; display: none; }
-
-/* 對話框 */
 #dialog {
   font-size: 3.5vw; height: 15vh; display: flex; align-items: flex-start; justify-content: center;
   white-space: pre-wrap; line-height: 1.6; text-shadow: 0 0 0.2em #0ff, 0 0 0.8em #0ff;
   text-align: center; width: 90%; margin: 0 auto; padding-top: 2vh; box-sizing: border-box;
 }
 
-/* 啟動遮罩 (解決 NFC 授權問題) */
-#startOverlay {
-  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(11, 12, 26, 0.95); z-index: 100;
-  display: flex; flex-direction: column; justify-content: center; align-items: center;
-  cursor: pointer;
-}
-.start-hint { color: #0ff; font-size: 5vw; animation: pulse 1.5s infinite; text-shadow: 0 0 10px #0ff; }
-
 .scanning-text { animation: pulse 1.5s infinite ease-in-out; }
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-
 .alert-text { font-size: 4.5vw; font-weight: bold; color: #ff4d4d; text-shadow: 0 0 10px #ff4d4d; }
 
-/* 卡牌區 */
 #cardArea { display: none; margin-top: 2vh; }
 .team-card {
   display: inline-block; width: 21vw; max-width: 140px; height: 30vw; max-height: 200px;
@@ -60,7 +75,6 @@ body {
 @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 .waiting { animation: glow 1.5s infinite; }
 @keyframes glow { 50% { box-shadow: 0 0 2vw rgba(0,255,255,0.7); } }
-
 .card-body { height: 70%; display: flex; justify-content: center; align-items: center; }
 .card-body img { width: 90%; opacity: 0; transition: opacity 0.8s; }
 .card-footer { background: #1a1c33; font-size: 1.5vw; padding: 0.5vw; color: #0ff; }
@@ -72,10 +86,9 @@ body {
   background: rgba(11, 12, 26, 0.9); color: #0ff; border: 2px solid #0ff; border-radius: 50px;
   cursor: pointer; box-shadow: 0 0 1vw #0ff; transition: all 0.3s ease; letter-spacing: 2px;
 }
-#goBtn.breathe { animation: goBreathe 2s infinite ease-in-out; }
+.breathe { animation: goBreathe 2s infinite ease-in-out; }
 @keyframes goBreathe { 0%, 100% { box-shadow: 0 0 1vw #0ff; } 50% { box-shadow: 0 0 3vw #0ff; } }
 
-/* 備用按鈕 (僅在 NFC 失敗時顯示) */
 #testArea { display: none; position: fixed; bottom: 20px; }
 .testBtn { padding: 8px 15px; background: rgba(0,255,255,0.2); border: 1px solid #0ff; color: #0ff; border-radius: 5px; margin: 5px; }
 </style>
@@ -83,7 +96,13 @@ body {
 <body>
 
 <div id="startOverlay" onclick="handleStart()">
-  <div class="start-hint">【 點擊螢幕 接收任務指令 】</div>
+  <div class="scanner-ring">
+    <div style="font-size: 40px;">🔑</div>
+  </div>
+  <div class="start-hint">
+    身份驗證中...<br>
+    <span style="font-size: 3vw; opacity: 0.7;">[ 點擊螢幕 以解鎖任務指令 ]</span>
+  </div>
 </div>
 
 <div id="stars"></div>
@@ -97,10 +116,7 @@ body {
   <div id="card2" class="team-card waiting"><div class="card-body"></div><div class="card-footer blink">---</div></div>
 </div>
 <button id="goBtn" class="breathe" onclick="goNext()">GO!!!</button>
-<div id="testArea">
-  <button class="testBtn" onclick="scanCard('maoqiu')">手動：毛球</button>
-  <button class="testBtn" onclick="scanCard('hachu')">手動：哈啾</button>
-</div>
+<div id="testArea"><button class="testBtn" onclick="scanCard('maoqiu')">手動：毛球</button><button class="testBtn" onclick="scanCard('hachu')">手動：哈啾</button></div>
 <audio id="scanSound" src="music/scan.mp3"></audio>
 
 <script>
@@ -117,10 +133,19 @@ let calling = false;
 const names = { maoqiu: "毛球", hachu: "哈啾" };
 const wait = ms => new Promise(r => setTimeout(r, ms));
 
+// 修改點擊啟動邏輯
 async function handleStart() {
-  document.getElementById("startOverlay").style.display = "none";
-  // 在點擊的瞬間同時啟動 NFC 掃描和劇情
+  const overlay = document.getElementById("startOverlay");
+  overlay.style.opacity = "0";
+  setTimeout(() => overlay.style.display = "none", 500);
+
+  // 1. 強制震動，建立觸覺連結
+  if (navigator.vibrate) navigator.vibrate(50);
+  
+  // 2. 啟動 NFC 監聽
   initNFC(); 
+  
+  // 3. 啟動劇情
   startStory();
 }
 
@@ -133,10 +158,7 @@ async function initNFC() {
         for (const record of message.records) {
           const textDecoder = new TextDecoder(record.encoding);
           const rawData = textDecoder.decode(record.data).toLowerCase();
-          
-          // 關鍵修正：檢查讀到的字串是否「包含」關鍵字，過濾掉語言標籤
           const matchedId = Object.keys(names).find(id => rawData.includes(id));
-          
           if (matchedId && !team.includes(matchedId) && calling) {
             if (navigator.vibrate) navigator.vibrate(200);
             scanCard(matchedId);
@@ -144,7 +166,7 @@ async function initNFC() {
         }
       };
     } catch (e) {
-      console.log("NFC Scan Error:", e);
+      console.log("NFC Error:", e);
       document.getElementById("testArea").style.display = "block";
     }
   } else {
@@ -153,9 +175,11 @@ async function initNFC() {
 }
 
 async function startStory() {
-  if (navigator.vibrate) navigator.vibrate([100, 50, 200]);
   const dialog = document.getElementById("dialog");
   document.getElementById("pigStarImg").style.display = "block";
+
+  // 震動回饋：任務啟動感
+  if (navigator.vibrate) navigator.vibrate([100, 50, 200]);
 
   for(let i=0; i<3; i++) {
     dialog.innerHTML = `<div class="alert-text" style="margin-top:2vh">緊急任務!!! 緊急任務!!!</div>`;
@@ -195,15 +219,12 @@ async function typeText(text, speed) {
 function scanCard(id) {
   if(!calling || team.includes(id)) return;
   team.push(id);
-  
   const sfx = document.getElementById("scanSound");
   if(sfx) sfx.play().catch(e => {});
-
   let card = document.getElementById(team.length === 1 ? "card1" : "card2");
   card.classList.remove("waiting");
   card.querySelector(".card-footer").innerText = names[id];
   card.querySelector(".card-footer").classList.remove("blink");
-  
   let img = document.createElement("img");
   img.src = `images/characters/${id}.png`;
   card.querySelector(".card-body").appendChild(img);

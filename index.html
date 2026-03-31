@@ -76,7 +76,6 @@ body {
 #imageStage img { width: 40vw; max-width: 220px; display: none; filter: drop-shadow(0 0 10px #0ff); }
 
 #dialog {
-  /* 使用 clamp 確保字體在不同螢幕都夠大且不跑版 */
   font-size: clamp(20px, 5.5vw, 28px); 
   height: 18vh; display: flex; align-items: center; justify-content: center;
   white-space: pre-wrap; line-height: 1.5; text-shadow: 0 0 8px #0ff;
@@ -153,12 +152,13 @@ body {
 <div id="testArea">
   <button class="testBtn" onclick="scanCard('maoqiu')">手動：毛球</button>
   <button class="testBtn" onclick="scanCard('hachu')">手動：哈啾</button>
+  <button class="testBtn" style="background: rgba(255,77,77,0.3); border-color: #ff4d4d;" onclick="location.reload()">模擬：指揮官刷卡(重整)</button>
 </div>
 
 <audio id="scanSound" src="music/scan.mp3"></audio>
 
 <script>
-// 初始化星空 (維持原邏輯)
+// 初始化星空
 function createStars() {
   const starsDiv = document.getElementById('stars');
   starsDiv.innerHTML = '';
@@ -176,6 +176,9 @@ function createStars() {
 }
 createStars();
 
+// 核心功能：啟動時立即監聽 NFC (確保任何時候刷指揮官卡都能重整)
+initNFC();
+
 let team = [];
 let calling = false;
 const names = { maoqiu: "毛球", hachu: "哈啾" };
@@ -188,7 +191,6 @@ async function checkPass() {
     overlay.style.opacity = "0";
     setTimeout(() => overlay.style.display = "none", 500);
     if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
-    initNFC(); 
     startStory();
   } else {
     input.classList.add("error-shake");
@@ -211,8 +213,18 @@ async function initNFC() {
       await ndef.scan();
       ndef.onreading = ({ message }) => {
         for (const record of message.records) {
-          const textDecoder = new TextDecoder(record.encoding);
+          const textDecoder = new TextDecoder(record.encoding || "utf-8");
           const rawData = textDecoder.decode(record.data).toLowerCase();
+
+          // --- 判斷 1：如果是 URL 紀錄 (你的指揮官卡) ---
+          // 因為你的指揮官卡是寫入 URL 用來開啟網頁的，刷入時 recordType 會是 "url"
+          if (record.recordType === "url") {
+            if (navigator.vibrate) navigator.vibrate(500); // 長震動提示
+            location.reload(); // 執行重新整理
+            return;
+          }
+
+          // --- 判斷 2：如果是 Text 紀錄 (你的隊員卡) ---
           const matchedId = Object.keys(names).find(id => rawData.includes(id));
           if (matchedId && !team.includes(matchedId) && calling) {
             if (navigator.vibrate) navigator.vibrate(200);

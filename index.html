@@ -12,7 +12,7 @@
 
 html, body {
   width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden;
-  background: #0b0c1a; color: #fff; font-family: 'ChenYuluoyan', 'Microsoft JhengHei', sans-serif;
+  background: #0b0c1a; color: #fff; font-family: 'ChenYuluoyan', sans-serif;
 }
 
 body {
@@ -20,107 +20,128 @@ body {
   display: flex; flex-direction: column; justify-content: flex-start; align-items: center;
 }
 
-/* 星空背景 */
-#stars { position: fixed; width: 100%; height: 100%; overflow: hidden; top: 0; left: 0; z-index: 0; pointer-events: none; }
-.star { position: absolute; background: white; border-radius: 50%; box-shadow: 0 0 3px #fff; animation: starTwinkle linear infinite; }
-@keyframes starTwinkle { 0%, 100% { opacity: 0.2; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.2); } }
+/* 星空容器修正 */
+#stars { 
+  position: absolute; width: 100%; height: 100%; overflow: hidden; 
+  top: 0; left: 0; z-index: 0; pointer-events: none;
+}
 
-/* 登入與授權遮罩 */
+.star { 
+  position: absolute; background: white; border-radius: 50%; 
+  box-shadow: 0 0 3px #fff; animation: starTwinkle linear infinite; 
+}
+
+@keyframes starTwinkle { 
+  0%, 100% { opacity: 0.2; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* 密碼驗證遮罩 */
 #startOverlay {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
   background: rgba(11, 12, 26, 0.98); z-index: 100;
   display: flex; flex-direction: column; justify-content: center; align-items: center;
   transition: opacity 0.5s;
 }
+
 .login-box {
   background: rgba(0, 255, 255, 0.05);
   padding: 30px; border: 1px solid #0ff; border-radius: 15px;
   box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
-  text-align: center; width: 85%; max-width: 320px;
+  text-align: center; width: 80%; max-width: 300px;
 }
-.login-box h2 { color: #0ff; font-size: clamp(24px, 6vw, 32px); margin-bottom: 10px; letter-spacing: 2px; }
-.hint { color: #aaa; font-size: 16px; margin-bottom: 20px; }
+
+.login-box h2 { color: #0ff; font-size: 24px; margin-bottom: 10px; letter-spacing: 2px; }
+.hint { color: #aaa; font-size: 14px; margin-bottom: 20px; }
 
 #passInput {
   width: 80%; background: transparent; border: none; border-bottom: 2px solid #0ff;
-  color: #0ff; font-size: 32px; text-align: center; letter-spacing: 10px;
-  outline: none; margin-bottom: 25px; font-family: sans-serif;
+  color: #0ff; font-size: 28px; text-align: center; letter-spacing: 10px;
+  outline: none; margin-bottom: 20px; font-family: sans-serif;
 }
-.action-btn {
-  background: #0ff; color: #000; border: none; padding: 12px 40px;
-  border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 20px;
+
+#loginBtn {
+  background: #0ff; color: #000; border: none; padding: 10px 30px;
+  border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 18px;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
 }
 .error-shake { animation: shake 0.3s; border-bottom-color: #ff4d4d !important; }
-@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
 
 /* 劇情內容樣式 */
-#imageStage { margin-top: 4vh; width: 100%; height: 25vh; display: flex; justify-content: center; align-items: center; position: relative; z-index: 1; }
-#imageStage img { width: 40vw; max-width: 220px; display: none;}
+#imageStage { margin-top: 5vh; margin-bottom: 5vh; width: 100%; height: 28vh; display: flex; justify-content: center; align-items: center; position: relative; z-index: 1; }
+#imageStage img { width: 35vw; max-width: 250px; display: none; }
 
 #dialog {
-  font-size: clamp(20px, 5.5vw, 28px); height: 18vh; display: flex; align-items: center; justify-content: center;
-  white-space: pre-wrap; line-height: 1.5; text-shadow: 0 0 8px #0ff;
-  text-align: center; width: 90%; margin: 0 auto; position: relative; z-index: 1;
+  font-size: 18px; height: 15vh; display: flex; align-items: flex-start; justify-content: center;
+  white-space: pre-wrap; line-height: 1.6; text-shadow: 0 0 0.2em #0ff, 0 0 0.8em #0ff;
+  text-align: center; width: 90%; margin: 0 auto; padding-top: 2vh; box-sizing: border-box;
+  position: relative; z-index: 1;
 }
 
-.alert-text { font-size: clamp(24px, 7vw, 32px); font-weight: bold; color: #ff4d4d; text-shadow: 0 0 15px #ff4d4d; }
+.scanning-text { animation: pulse 1.5s infinite ease-in-out; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+.alert-text { font-size: 22px; font-weight: bold; color: #ff4d4d; text-shadow: 0 0 10px #ff4d4d; }
 
-#cardArea { display: none; margin-top: 1vh; position: relative; z-index: 1; text-align: center; width: 100%; }
+#cardArea { display: none; margin-top: 2vh; position: relative; z-index: 1; text-align: center; }
 .team-card {
-  display: inline-block; width: 28vw; max-width: 150px; height: 38vw; max-height: 200px;
-  margin: 10px; border-radius: 15px; border: 2px solid #0ff;
-  background: rgba(26, 28, 51, 0.8); box-shadow: 0 0 15px rgba(0,255,255,0.3);
+  display: inline-block; width: 21vw; max-width: 140px; height: 30vw; max-height: 200px;
+  margin: 1.5vw; border-radius: 12px; border: 2px solid #888;
+  background: linear-gradient(145deg, #1a1c33, #2b2f50); box-shadow: 0 0 1.5vw rgba(0,255,255,0.3);
   position: relative; overflow: hidden; animation: float 3s infinite ease-in-out;
 }
-@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-
-.card-body { height: 75%; display: flex; justify-content: center; align-items: center; }
-.card-body img { width: 85%; opacity: 0; transition: opacity 0.8s; }
-.card-footer { background: rgba(0, 255, 255, 0.2); font-size: 18px; padding: 5px 0; color: #0ff; font-weight: bold; }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+.waiting { animation: glow 1.5s infinite; }
+@keyframes glow { 50% { box-shadow: 0 0 2vw rgba(0,255,255,0.7); } }
+.card-body { height: 70%; display: flex; justify-content: center; align-items: center; }
+.card-body img { width: 90%; opacity: 0; transition: opacity 0.8s; }
+.card-footer { background: #1a1c33; font-size: 12px; padding: 0.5vw; color: #0ff; }
 .blink { animation: blink 1s infinite; }
 @keyframes blink { 50% { opacity: 0.3; } }
 
 #goBtn {
-  display: none; margin-top: 2vh; padding: 15px 50px; font-size: 22px; font-weight: bold;
-  background: #000; color: #0ff; border: 3px solid #0ff; border-radius: 50px;
-  cursor: pointer; box-shadow: 0 0 15px #0ff; transition: all 0.3s ease; letter-spacing: 4px; position: relative; z-index: 2;
+  display: none; margin-top: 3vh; padding: 1.8vh 6vw; font-size: 16px; font-weight: bold;
+  background: rgba(11, 12, 26, 0.9); color: #0ff; border: 2px solid #0ff; border-radius: 50px;
+  cursor: pointer; box-shadow: 0 0 1vw #0ff; transition: all 0.3s ease; letter-spacing: 2px;
+  position: relative; z-index: 2;
 }
 .breathe { animation: goBreathe 2s infinite ease-in-out; }
-@keyframes goBreathe { 0%, 100% { transform: scale(1); box-shadow: 0 0 15px #0ff; } 50% { transform: scale(1.05); box-shadow: 0 0 30px #0ff; } }
+@keyframes goBreathe { 0%, 100% { box-shadow: 0 0 1vw #0ff; } 50% { box-shadow: 0 0 3vw #0ff; } }
 
-#testArea { display: none; position: fixed; bottom: 15px; z-index: 10; width: 100%; text-align: center; }
-.testBtn { padding: 10px 20px; background: rgba(0,255,255,0.2); border: 1px solid #0ff; color: #0ff; border-radius: 5px; margin: 5px; font-size: 14px; }
+#testArea { display: none; position: fixed; bottom: 20px; z-index: 10; }
+.testBtn { padding: 8px 15px; background: rgba(0,255,255,0.2); border: 1px solid #0ff; color: #0ff; border-radius: 5px; margin: 5px; cursor: pointer; }
 </style>
 </head>
 <body>
 
 <div id="startOverlay">
-  <div id="stepPassword" class="login-box">
+  <div class="login-box">
     <h2>身份驗證</h2>
     <p class="hint">密碼提示: sunnyday</p>
     <input type="password" id="passInput" placeholder="****" inputmode="numeric" maxlength="4">
     <br>
-    <button class="action-btn" onclick="checkPass()">解鎖任務</button>
-  </div>
-
-  <div id="stepNFC" class="login-box" style="display: none;">
-    <h2>系統就緒</h2>
-    <p class="hint" style="color: #0ff;">此任務需要使用偵測功能<br>請點擊下方按鈕啟動</p>
-    <br>
-    <button class="action-btn" onclick="enableNFC()">開啟偵測功能</button>
+    <button id="loginBtn" onclick="checkPass()">解鎖任務</button>
   </div>
 </div>
 
 <div id="stars"></div>
+
 <div id="imageStage">
   <img id="pigStarImg" src="images/characters/pigstar.png">
   <img id="piggyImg" src="images/characters/pigpig.png">
 </div>
+
 <div id="dialog"></div>
+
 <div id="cardArea">
   <div id="card1" class="team-card waiting"><div class="card-body"></div><div class="card-footer blink">---</div></div>
   <div id="card2" class="team-card waiting"><div class="card-body"></div><div class="card-footer blink">---</div></div>
 </div>
+
 <button id="goBtn" class="breathe" onclick="goNext()">GO!!!</button>
 
 <div id="testArea">
@@ -131,22 +152,34 @@ body {
 <audio id="scanSound" src="music/scan.mp3"></audio>
 
 <script>
-// 初始化星空
+// 初始化星空函數
 function createStars() {
   const starsDiv = document.getElementById('stars');
-  starsDiv.innerHTML = '';
-  for(let i=0; i<100; i++) {
+  starsDiv.innerHTML = ''; // 清空原有星星
+  const count = 100; // 星星數量
+  
+  for(let i=0; i<count; i++) {
     const s = document.createElement('div');
     s.className = 'star';
+    
+    // 隨機大小
     const size = (Math.random() * 2 + 1) + 'px';
-    s.style.width = size; s.style.height = size;
+    s.style.width = size;
+    s.style.height = size;
+    
+    // 隨機位置
     s.style.top = Math.random() * 100 + '%';
     s.style.left = Math.random() * 100 + '%';
+    
+    // 隨機動畫時間與延遲
     s.style.animationDuration = (Math.random() * 3 + 2) + 's';
     s.style.animationDelay = (Math.random() * 5) + 's';
+    
     starsDiv.appendChild(s);
   }
 }
+
+// 執行初始化
 createStars();
 
 let team = [];
@@ -154,14 +187,17 @@ let calling = false;
 const names = { maoqiu: "毛球", hachu: "哈啾" };
 const wait = ms => new Promise(r => setTimeout(r, ms));
 
-// 1. 驗證密碼
 async function checkPass() {
   const input = document.getElementById("passInput");
+  const overlay = document.getElementById("startOverlay");
+
   if (input.value === "0411") {
+    overlay.style.opacity = "0";
+    setTimeout(() => overlay.style.display = "none", 500);
+    
     if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
-    // 切換到 NFC 詢問畫面
-    document.getElementById("stepPassword").style.display = "none";
-    document.getElementById("stepNFC").style.display = "block";
+    initNFC(); 
+    startStory();
   } else {
     input.classList.add("error-shake");
     if (navigator.vibrate) navigator.vibrate(200);
@@ -172,21 +208,6 @@ async function checkPass() {
   }
 }
 
-// 2. 開啟 NFC 並啟動劇情
-async function enableNFC() {
-  const overlay = document.getElementById("startOverlay");
-  
-  // 嘗試啟動 NFC
-  await initNFC();
-  
-  // 關閉遮罩並開始故事
-  overlay.style.opacity = "0";
-  setTimeout(() => {
-    overlay.style.display = "none";
-    startStory();
-  }, 500);
-}
-
 document.getElementById("passInput").addEventListener("keypress", (e) => {
   if (e.key === "Enter") checkPass();
 });
@@ -195,7 +216,7 @@ async function initNFC() {
   if ("NDEFReader" in window) {
     try {
       const ndef = new NDEFReader();
-      await ndef.scan(); // 這必須在 enableNFC 的點擊事件中觸發
+      await ndef.scan();
       ndef.onreading = ({ message }) => {
         for (const record of message.records) {
           const textDecoder = new TextDecoder(record.encoding);
@@ -208,7 +229,6 @@ async function initNFC() {
         }
       };
     } catch (e) {
-      console.log("NFC 啟動失敗:", e);
       document.getElementById("testArea").style.display = "block";
     }
   } else {
@@ -222,7 +242,7 @@ async function startStory() {
   if (navigator.vibrate) navigator.vibrate([100, 50, 200]);
 
   for(let i=0; i<3; i++) {
-    dialog.innerHTML = `<div class="alert-text">緊急任務!!! 緊急任務!!!</div>`;
+    dialog.innerHTML = `<div class="alert-text" style="margin-top:2vh">緊急任務!!! 緊急任務!!!</div>`;
     await wait(600); dialog.innerHTML = ""; await wait(400);
   }
 
@@ -235,9 +255,9 @@ async function startStory() {
   document.getElementById("piggyImg").style.display = "block";
   document.getElementById("cardArea").style.display = "block";
   calling = true;
-  
+  dialog.classList.add("scanning-text");
+
   while(calling) {
-    dialog.className = "scanning-text";
     await typeText("呼叫中...呼叫中...", 100);
     await wait(800);
     if(!calling) break;
@@ -274,9 +294,8 @@ function scanCard(id) {
 
   if(team.length === 2) {
     calling = false;
-    const dialog = document.getElementById("dialog");
-    dialog.className = ""; 
-    dialog.innerHTML = "";
+    document.getElementById("dialog").classList.remove("scanning-text");
+    document.getElementById("dialog").innerHTML = "";
     setTimeout(() => typeText("招集完畢 準備上工", 100), 500);
     document.getElementById("goBtn").style.display = "inline-block";
   }

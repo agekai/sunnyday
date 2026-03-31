@@ -21,20 +21,11 @@ body {
 }
 
 /* 星空背景 */
-#stars { 
-  position: fixed; width: 100%; height: 100%; overflow: hidden; 
-  top: 0; left: 0; z-index: 0; pointer-events: none;
-}
-.star { 
-  position: absolute; background: white; border-radius: 50%; 
-  box-shadow: 0 0 3px #fff; animation: starTwinkle linear infinite; 
-}
-@keyframes starTwinkle { 
-  0%, 100% { opacity: 0.2; transform: scale(0.8); }
-  50% { opacity: 1; transform: scale(1.2); }
-}
+#stars { position: fixed; width: 100%; height: 100%; overflow: hidden; top: 0; left: 0; z-index: 0; pointer-events: none; }
+.star { position: absolute; background: white; border-radius: 50%; box-shadow: 0 0 3px #fff; animation: starTwinkle linear infinite; }
+@keyframes starTwinkle { 0%, 100% { opacity: 0.2; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.2); } }
 
-/* 登入遮罩 */
+/* 登入與授權遮罩 */
 #startOverlay {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
   background: rgba(11, 12, 26, 0.98); z-index: 100;
@@ -47,9 +38,7 @@ body {
   box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
   text-align: center; width: 85%; max-width: 320px;
 }
-.login-box h2 { 
-  color: #0ff; font-size: clamp(24px, 6vw, 32px); margin-bottom: 10px; letter-spacing: 2px; 
-}
+.login-box h2 { color: #0ff; font-size: clamp(24px, 6vw, 32px); margin-bottom: 10px; letter-spacing: 2px; }
 .hint { color: #aaa; font-size: 16px; margin-bottom: 20px; }
 
 #passInput {
@@ -57,41 +46,26 @@ body {
   color: #0ff; font-size: 32px; text-align: center; letter-spacing: 10px;
   outline: none; margin-bottom: 25px; font-family: sans-serif;
 }
-#loginBtn {
+.action-btn {
   background: #0ff; color: #000; border: none; padding: 12px 40px;
   border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 20px;
 }
 .error-shake { animation: shake 0.3s; border-bottom-color: #ff4d4d !important; }
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-10px); }
-  75% { transform: translateX(10px); }
-}
+@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
 
-/* 劇情內容區 */
-#imageStage { 
-  margin-top: 4vh; width: 100%; height: 25vh; 
-  display: flex; justify-content: center; align-items: center; position: relative; z-index: 1; 
-}
-#imageStage img { width: 40vw; max-width: 220px; display: none; }/*filter: drop-shadow(0 0 10px #0ff);*/
+/* 劇情內容樣式 */
+#imageStage { margin-top: 4vh; width: 100%; height: 25vh; display: flex; justify-content: center; align-items: center; position: relative; z-index: 1; }
+#imageStage img { width: 40vw; max-width: 220px; display: none;}
 
 #dialog {
-  /* 使用 clamp 確保字體在不同螢幕都夠大且不跑版 */
-  font-size: clamp(20px, 5.5vw, 28px); 
-  height: 18vh; display: flex; align-items: center; justify-content: center;
+  font-size: clamp(20px, 5.5vw, 28px); height: 18vh; display: flex; align-items: center; justify-content: center;
   white-space: pre-wrap; line-height: 1.5; text-shadow: 0 0 8px #0ff;
   text-align: center; width: 90%; margin: 0 auto; position: relative; z-index: 1;
 }
 
-.alert-text { 
-  font-size: clamp(24px, 7vw, 32px); font-weight: bold; color: #ff4d4d; 
-  text-shadow: 0 0 15px #ff4d4d; animation: pulse 0.5s infinite;
-}
-@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+.alert-text { font-size: clamp(24px, 7vw, 32px); font-weight: bold; color: #ff4d4d; text-shadow: 0 0 15px #ff4d4d; }
 
-#cardArea { 
-  display: none; margin-top: 1vh; position: relative; z-index: 1; text-align: center; width: 100%;
-}
+#cardArea { display: none; margin-top: 1vh; position: relative; z-index: 1; text-align: center; width: 100%; }
 .team-card {
   display: inline-block; width: 28vw; max-width: 150px; height: 38vw; max-height: 200px;
   margin: 10px; border-radius: 15px; border: 2px solid #0ff;
@@ -102,18 +76,14 @@ body {
 
 .card-body { height: 75%; display: flex; justify-content: center; align-items: center; }
 .card-body img { width: 85%; opacity: 0; transition: opacity 0.8s; }
-.card-footer { 
-  background: rgba(0, 255, 255, 0.2); font-size: 18px; padding: 5px 0; color: #0ff; font-weight: bold;
-}
+.card-footer { background: rgba(0, 255, 255, 0.2); font-size: 18px; padding: 5px 0; color: #0ff; font-weight: bold; }
 .blink { animation: blink 1s infinite; }
 @keyframes blink { 50% { opacity: 0.3; } }
 
 #goBtn {
-  display: none; margin-top: 2vh; padding: 15px 50px; 
-  font-size: 22px; font-weight: bold;
+  display: none; margin-top: 2vh; padding: 15px 50px; font-size: 22px; font-weight: bold;
   background: #000; color: #0ff; border: 3px solid #0ff; border-radius: 50px;
-  cursor: pointer; box-shadow: 0 0 15px #0ff; transition: all 0.3s ease; 
-  letter-spacing: 4px; position: relative; z-index: 2;
+  cursor: pointer; box-shadow: 0 0 15px #0ff; transition: all 0.3s ease; letter-spacing: 4px; position: relative; z-index: 2;
 }
 .breathe { animation: goBreathe 2s infinite ease-in-out; }
 @keyframes goBreathe { 0%, 100% { transform: scale(1); box-shadow: 0 0 15px #0ff; } 50% { transform: scale(1.05); box-shadow: 0 0 30px #0ff; } }
@@ -125,29 +95,32 @@ body {
 <body>
 
 <div id="startOverlay">
-  <div class="login-box">
+  <div id="stepPassword" class="login-box">
     <h2>身份驗證</h2>
     <p class="hint">密碼提示: sunnyday</p>
     <input type="password" id="passInput" placeholder="****" inputmode="numeric" maxlength="4">
     <br>
-    <button id="loginBtn" onclick="checkPass()">解鎖任務</button>
+    <button class="action-btn" onclick="checkPass()">解鎖任務</button>
+  </div>
+
+  <div id="stepNFC" class="login-box" style="display: none;">
+    <h2>系統就緒</h2>
+    <p class="hint" style="color: #0ff;">此任務需要使用偵測功能<br>請點擊下方按鈕啟動</p>
+    <br>
+    <button class="action-btn" onclick="enableNFC()">開啟偵測功能</button>
   </div>
 </div>
 
 <div id="stars"></div>
-
 <div id="imageStage">
   <img id="pigStarImg" src="images/characters/pigstar.png">
   <img id="piggyImg" src="images/characters/pigpig.png">
 </div>
-
 <div id="dialog"></div>
-
 <div id="cardArea">
   <div id="card1" class="team-card waiting"><div class="card-body"></div><div class="card-footer blink">---</div></div>
   <div id="card2" class="team-card waiting"><div class="card-body"></div><div class="card-footer blink">---</div></div>
 </div>
-
 <button id="goBtn" class="breathe" onclick="goNext()">GO!!!</button>
 
 <div id="testArea">
@@ -158,7 +131,7 @@ body {
 <audio id="scanSound" src="music/scan.mp3"></audio>
 
 <script>
-// 初始化星空 (維持原邏輯)
+// 初始化星空
 function createStars() {
   const starsDiv = document.getElementById('stars');
   starsDiv.innerHTML = '';
@@ -181,15 +154,14 @@ let calling = false;
 const names = { maoqiu: "毛球", hachu: "哈啾" };
 const wait = ms => new Promise(r => setTimeout(r, ms));
 
+// 1. 驗證密碼
 async function checkPass() {
   const input = document.getElementById("passInput");
-  const overlay = document.getElementById("startOverlay");
   if (input.value === "0411") {
-    overlay.style.opacity = "0";
-    setTimeout(() => overlay.style.display = "none", 500);
     if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
-    initNFC(); 
-    startStory();
+    // 切換到 NFC 詢問畫面
+    document.getElementById("stepPassword").style.display = "none";
+    document.getElementById("stepNFC").style.display = "block";
   } else {
     input.classList.add("error-shake");
     if (navigator.vibrate) navigator.vibrate(200);
@@ -200,6 +172,21 @@ async function checkPass() {
   }
 }
 
+// 2. 開啟 NFC 並啟動劇情
+async function enableNFC() {
+  const overlay = document.getElementById("startOverlay");
+  
+  // 嘗試啟動 NFC
+  await initNFC();
+  
+  // 關閉遮罩並開始故事
+  overlay.style.opacity = "0";
+  setTimeout(() => {
+    overlay.style.display = "none";
+    startStory();
+  }, 500);
+}
+
 document.getElementById("passInput").addEventListener("keypress", (e) => {
   if (e.key === "Enter") checkPass();
 });
@@ -208,7 +195,7 @@ async function initNFC() {
   if ("NDEFReader" in window) {
     try {
       const ndef = new NDEFReader();
-      await ndef.scan();
+      await ndef.scan(); // 這必須在 enableNFC 的點擊事件中觸發
       ndef.onreading = ({ message }) => {
         for (const record of message.records) {
           const textDecoder = new TextDecoder(record.encoding);
@@ -221,6 +208,7 @@ async function initNFC() {
         }
       };
     } catch (e) {
+      console.log("NFC 啟動失敗:", e);
       document.getElementById("testArea").style.display = "block";
     }
   } else {

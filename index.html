@@ -34,97 +34,72 @@ body {
 
 .login-box {
   background: rgba(0, 255, 255, 0.05);
-  padding: 40px 20px; border: 2px solid #0ff; border-radius: 20px;
-  box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
-  text-align: center; width: 85%; max-width: 320px;
+  padding: 30px; border: 1px solid #0ff; border-radius: 15px;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+  text-align: center; width: 80%; max-width: 300px;
 }
 
-.login-box h2 { 
-  color: #0ff; font-size: 2.2rem; margin-bottom: 10px; letter-spacing: 4px;
-  font-family: 'ChenYuluoyan', sans-serif;
-}
-.hint { color: #aaa; font-size: 1.2rem; margin-bottom: 25px; }
+.login-box h2 { color: #0ff; font-size: 5vw; margin-bottom: 10px; letter-spacing: 2px; }
+.hint { color: #aaa; font-size: 3vw; margin-bottom: 20px; }
 
-/* 密碼輸入框 */
 #passInput {
-  width: 80%; background: transparent; border: none; border-bottom: 3px solid #0ff;
-  color: #0ff; font-size: 2.8rem; text-align: center; letter-spacing: 12px;
-  outline: none; margin-bottom: 30px; font-family: sans-serif; transition: border-color 0.3s;
-}
-
-/* 密碼錯誤動畫 */
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  20%, 60% { transform: translateX(-10px); }
-  40%, 80% { transform: translateX(10px); }
-}
-.error-state { 
-  animation: shake 0.4s ease-in-out; 
-  border-bottom-color: #ff4d4d !important; 
-  color: #ff4d4d !important;
-  text-shadow: 0 0 10px #ff4d4d;
+  width: 80%; background: transparent; border: none; border-bottom: 2px solid #0ff;
+  color: #0ff; font-size: 6vw; text-align: center; letter-spacing: 10px;
+  outline: none; margin-bottom: 20px; font-family: sans-serif;
 }
 
 #loginBtn {
-  background: #0ff; color: #000; border: none; padding: 12px 40px;
-  border-radius: 50px; font-weight: bold; cursor: pointer; 
-  font-size: 1.6rem; font-family: 'ChenYuluoyan', sans-serif;
-  box-shadow: 0 0 15px #0ff;
+  background: #0ff; color: #000; border: none; padding: 10px 30px;
+  border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 4vw;
 }
 
-/* 遊戲畫面區 */
-#imageStage { margin-top: 6vh; margin-bottom: 4vh; width: 100%; height: 25vh; display: flex; justify-content: center; align-items: center; }
-#imageStage img { width: 55vw; max-width: 300px; display: none; }
+/* 密碼錯誤時的震動動畫 */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
+.error-shake { animation: shake 0.3s; border-bottom-color: #ff4d4d !important; }
 
+/* 劇情內容樣式 (維持原樣) */
+#imageStage { margin-top: 5vh; margin-bottom: 5vh; width: 100%; height: 28vh; display: flex; justify-content: center; align-items: center; }
+#imageStage img { width: 35vw; max-width: 250px; display: none; }
 #dialog {
-  font-size: 1.9rem; height: 18vh; display: flex; align-items: flex-start; justify-content: center;
-  white-space: pre-wrap; line-height: 1.4; text-shadow: 0 0 0.3em #0ff, 0 0 0.6em #0ff;
-  text-align: center; width: 95%; margin: 0 auto; padding-top: 2vh; box-sizing: border-box;
+  font-size: 3.5vw; height: 15vh; display: flex; align-items: flex-start; justify-content: center;
+  white-space: pre-wrap; line-height: 1.6; text-shadow: 0 0 0.2em #0ff, 0 0 0.8em #0ff;
+  text-align: center; width: 90%; margin: 0 auto; padding-top: 2vh; box-sizing: border-box;
 }
 
-.alert-text { font-size: 2.3rem; font-weight: bold; color: #ff4d4d; text-shadow: 0 0 15px #ff4d4d; }
+.scanning-text { animation: pulse 1.5s infinite ease-in-out; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+.alert-text { font-size: 4.5vw; font-weight: bold; color: #ff4d4d; text-shadow: 0 0 10px #ff4d4d; }
 
-/* 卡牌區修正 */
 #cardArea { display: none; margin-top: 2vh; }
 .team-card {
-  display: inline-block; width: 38vw; max-width: 170px; height: 55vw; max-height: 250px;
-  margin: 2vw; border-radius: 15px; border: 2px solid #888;
-  background: linear-gradient(145deg, #1a1c33, #2b2f50); box-shadow: 0 0 20px rgba(0,255,255,0.3);
+  display: inline-block; width: 21vw; max-width: 140px; height: 30vw; max-height: 200px;
+  margin: 1.5vw; border-radius: 12px; border: 2px solid #888;
+  background: linear-gradient(145deg, #1a1c33, #2b2f50); box-shadow: 0 0 1.5vw rgba(0,255,255,0.3);
   position: relative; overflow: hidden; animation: float 3s infinite ease-in-out;
 }
-
-.card-body { height: 75%; display: flex; justify-content: center; align-items: center; }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+.waiting { animation: glow 1.5s infinite; }
+@keyframes glow { 50% { box-shadow: 0 0 2vw rgba(0,255,255,0.7); } }
+.card-body { height: 70%; display: flex; justify-content: center; align-items: center; }
 .card-body img { width: 90%; opacity: 0; transition: opacity 0.8s; }
-
-/* 名字置中對齊優化 */
-.card-footer { 
-  background: rgba(26, 28, 51, 0.95); 
-  height: 25%; 
-  width: 100%;
-  display: flex; 
-  justify-content: center; 
-  align-items: center; 
-  font-size: 1.6rem; 
-  color: #0ff; 
-  border-top: 1px solid rgba(0,255,255,0.3);
-  text-align: center;
-  box-sizing: border-box;
-}
+.card-footer { background: #1a1c33; font-size: 1.5vw; padding: 0.5vw; color: #0ff; }
+.blink { animation: blink 1s infinite; }
+@keyframes blink { 50% { opacity: 0.3; } }
 
 #goBtn {
-  display: none; margin-top: 4vh; padding: 15px 60px; 
-  font-size: 2rem; font-weight: bold;
+  display: none; margin-top: 3vh; padding: 1.8vh 6vw; font-size: 2.8vw; font-weight: bold;
   background: rgba(11, 12, 26, 0.9); color: #0ff; border: 2px solid #0ff; border-radius: 50px;
-  cursor: pointer; box-shadow: 0 0 20px #0ff; transition: all 0.3s ease; 
-  letter-spacing: 4px; font-family: 'ChenYuluoyan', sans-serif;
+  cursor: pointer; box-shadow: 0 0 1vw #0ff; transition: all 0.3s ease; letter-spacing: 2px;
 }
 .breathe { animation: goBreathe 2s infinite ease-in-out; }
+@keyframes goBreathe { 0%, 100% { box-shadow: 0 0 1vw #0ff; } 50% { box-shadow: 0 0 3vw #0ff; } }
 
-@keyframes goBreathe { 0%, 100% { box-shadow: 0 0 10px #0ff; transform: scale(1); } 50% { box-shadow: 0 0 30px #0ff; transform: scale(1.05); } }
-@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-
-#testArea { display: none; position: fixed; bottom: 10px; }
-.testBtn { padding: 10px 20px; background: rgba(0,255,255,0.2); border: 1px solid #0ff; color: #0ff; border-radius: 5px; margin: 5px; font-size: 1.2rem; }
+#testArea { display: none; position: fixed; bottom: 20px; }
+.testBtn { padding: 8px 15px; background: rgba(0,255,255,0.2); border: 1px solid #0ff; color: #0ff; border-radius: 5px; margin: 5px; }
 </style>
 </head>
 <body>
@@ -172,30 +147,31 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
 async function checkPass() {
   const input = document.getElementById("passInput");
   const overlay = document.getElementById("startOverlay");
-  
+
   if (input.value === "0411") {
+    // 密碼正確
     overlay.style.opacity = "0";
     setTimeout(() => overlay.style.display = "none", 500);
-    if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+    
+    if (navigator.vibrate) navigator.vibrate([50, 50, 50]); // 成功音感震動
     initNFC(); 
     startStory();
   } else {
-    // 錯誤：晃動變紅
-    input.classList.add("error-state");
-    if (navigator.vibrate) navigator.vibrate(300);
+    // 密碼錯誤
+    input.classList.add("error-shake");
+    if (navigator.vibrate) navigator.vibrate(200); // 錯誤震動
     setTimeout(() => {
-      input.classList.remove("error-state");
+      input.classList.remove("error-shake");
       input.value = "";
     }, 500);
   }
 }
 
-// 支援鍵盤 Enter
+// 支援輸入框按下 Enter 直接驗證
 document.getElementById("passInput").addEventListener("keypress", (e) => {
   if (e.key === "Enter") checkPass();
 });
 
-// NFC 初始化
 async function initNFC() {
   if ("NDEFReader" in window) {
     try {
@@ -213,6 +189,7 @@ async function initNFC() {
         }
       };
     } catch (e) {
+      console.log("NFC Error:", e);
       document.getElementById("testArea").style.display = "block";
     }
   } else {
@@ -265,12 +242,10 @@ function scanCard(id) {
   team.push(id);
   const sfx = document.getElementById("scanSound");
   if(sfx) sfx.play().catch(e => {});
-  
   let card = document.getElementById(team.length === 1 ? "card1" : "card2");
   card.classList.remove("waiting");
   card.querySelector(".card-footer").innerText = names[id];
   card.querySelector(".card-footer").classList.remove("blink");
-  
   let img = document.createElement("img");
   img.src = `images/characters/${id}.png`;
   card.querySelector(".card-body").appendChild(img);

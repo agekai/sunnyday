@@ -1,10 +1,338 @@
-function goNext() { 
-  // 3. 播放最後的換場音效
-  AudioEngine.playMissionStart(); 
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>角色登入 - 科技任務</title>
+<style>
+/* 原有 CSS 保持不變 */
+@font-face {
+  font-family: 'ChenYuluoyan';
+  src: url('fonts/ChenYuluoyan-2.0-Thin.ttf') format('truetype');
+}
+html, body { width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden; background: #0b0c1a; color: #fff; font-family: 'ChenYuluoyan', 'Microsoft JhengHei', sans-serif; }
+body { background: radial-gradient(ellipse at center, #0b0c1a 0%, #1a1c33 100%); display: flex; flex-direction: column; justify-content: flex-start; align-items: center; }
+input, button, select, textarea { font-family: 'ChenYuluoyan', 'Microsoft JhengHei', sans-serif; }
+#stars { position: fixed; width: 100%; height: 100%; overflow: hidden; top: 0; left: 0; z-index: 0; pointer-events: none; }
+.star { position: absolute; background: white; border-radius: 50%; box-shadow: 0 0 3px #fff; animation: starTwinkle linear infinite; }
+@keyframes starTwinkle { 0%, 100% { opacity: 0.2; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.2); } }
+#startOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 12, 26, 0.98); z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s; }
+.login-box { background: rgba(0, 255, 255, 0.05); padding: 30px; border: 1px solid #0ff; border-radius: 15px; box-shadow: 0 0 20px rgba(0, 255, 255, 0.2); text-align: center; width: 85%; max-width: 320px; }
+.login-box h2 { color: #0ff; font-size: clamp(24px, 6vw, 32px); margin-bottom: 10px; letter-spacing: 2px; }
+.hint { color: #aaa; font-size: 16px; margin-bottom: 20px; }
+#passInput { width: 80%; background: transparent; border: none; border-bottom: 2px solid #0ff; color: #0ff; font-size: 32px; text-align: center; letter-spacing: 10px; outline: none; margin-bottom: 25px; }
+#loginBtn { background: #0ff; color: #000; border: none; padding: 12px 40px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 20px; transition: all 0.2s; }
+#loginBtn:active { transform: scale(0.95); background: #00cccc; }
+.error-shake { animation: shake 0.3s; border-bottom-color: #ff4d4d !important; }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+#imageStage { margin-top: 4vh; width: 100%; height: 25vh; display: flex; justify-content: center; align-items: center; position: relative; z-index: 1; }
+#imageStage img { width: 40vw; max-width: 220px; display: none; filter: drop-shadow(0 0 10px #0ff); }
+#dialog { font-size: clamp(20px, 5.5vw, 28px); height: 18vh; display: flex; align-items: center; justify-content: center; white-space: pre-wrap; line-height: 1.5; text-shadow: 0 0 8px #0ff; text-align: center; width: 90%; margin: 0 auto; position: relative; z-index: 1; }
+.alert-text { font-size: clamp(24px, 7vw, 32px); font-weight: bold; color: #ff4d4d; text-shadow: 0 0 15px #ff4d4d; animation: pulse 0.5s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+#cardArea { display: none; margin-top: 1vh; position: relative; z-index: 1; text-align: center; width: 100%; }
+.team-card { display: inline-block; width: 28vw; max-width: 150px; height: 38vw; max-height: 200px; margin: 10px; border-radius: 15px; border: 2px dashed rgba(0, 255, 255, 0.3); background: rgba(26, 28, 51, 0.4); position: relative; overflow: hidden; transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+.scan-bar { position: absolute; left: 0; width: 100%; height: 5px; background: linear-gradient(to bottom, transparent, #0ff, transparent); box-shadow: 0 0 15px #0ff; z-index: 5; display: none; }
+.team-card.scanning .scan-bar { display: block; animation: scanMove 1.2s ease-in-out forwards; }
+@keyframes scanMove { 0% { top: -10%; opacity: 0; } 20% { opacity: 1; } 80% { opacity: 1; } 100% { top: 110%; opacity: 0; } }
+.team-card.active { border: 2px solid #0ff; background: rgba(26, 28, 51, 0.9); box-shadow: 0 0 20px rgba(0, 255, 255, 0.4); animation: float 3s infinite ease-in-out; }
+.card-body { height: 75%; display: flex; justify-content: center; align-items: center; }
+.card-body img { width: 85%; opacity: 0; filter: brightness(0) drop-shadow(0 0 2px #0ff); transform: translateY(20px); transition: opacity 0.5s, filter 1.5s ease, transform 1s ease; }
+.team-card.active .card-body img { opacity: 1; filter: brightness(1) drop-shadow(0 0 10px #0ff); transform: translateY(0); }
+.card-footer { background: rgba(0, 255, 255, 0.1); font-size: 18px; padding: 5px 0; color: #0ff; font-weight: bold; transition: background 0.5s; }
+.team-card.active .card-footer { background: rgba(0, 255, 255, 0.3); }
+.blink { animation: blink 1s infinite; }
+@keyframes blink { 50% { opacity: 0.3; } }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+#goBtn { display: none; margin-top: 2vh; padding: 15px 50px; font-size: 22px; font-weight: bold; background: #000; color: #0ff; border: 3px solid #0ff; border-radius: 50px; cursor: pointer; box-shadow: 0 0 15px #0ff; transition: all 0.3s ease; letter-spacing: 4px; position: relative; z-index: 2; }
+.breathe { animation: goBreathe 2s infinite ease-in-out; }
+@keyframes goBreathe { 0%, 100% { transform: scale(1); box-shadow: 0 0 15px #0ff; } 50% { transform: scale(1.05); box-shadow: 0 0 30px #0ff; } }
+#testArea { display: none; position: fixed; bottom: 15px; z-index: 10; width: 100%; text-align: center; }
+.testBtn { padding: 10px 20px; background: rgba(0,255,255,0.2); border: 1px solid #0ff; color: #0ff; border-radius: 5px; margin: 5px; font-size: 14px; }
+</style>
+</head>
+<body>
 
-  // 延遲一小段時間（例如 800 毫秒），讓音效播完後再跳轉
+<div id="startOverlay">
+  <div class="login-box">
+    <h2>身份驗證</h2>
+    <p class="hint">密碼提示: sunnyday</p>
+    <input type="password" id="passInput" placeholder="****" inputmode="numeric" maxlength="4">
+    <br>
+    <button id="loginBtn" onclick="checkPass()">登入任務</button>
+  </div>
+</div>
+
+<div id="stars"></div>
+<div id="imageStage"><img id="pigStarImg" src="images/characters/pigstar.png"><img id="piggyImg" src="images/characters/pigpig.png"></div>
+<div id="dialog"></div>
+<div id="cardArea">
+  <div id="card1" class="team-card waiting"><div class="scan-bar"></div><div class="card-body"></div><div class="card-footer blink">---</div></div>
+  <div id="card2" class="team-card waiting"><div class="scan-bar"></div><div class="card-body"></div><div class="card-footer blink">---</div></div>
+</div>
+<button id="goBtn" class="breathe" onclick="goNext()">GO!!!</button>
+<div id="testArea">
+  <button class="testBtn" onclick="scanCard('maoqiu')">手動：毛球</button>
+  <button class="testBtn" onclick="scanCard('hachu')">手動：哈啾</button>
+</div>
+
+<script>
+// 全域變數定義
+let team = [];
+let calling = false;
+const names = { maoqiu: "毛球", hachu: "哈啾" };
+
+const AudioEngine = {
+  ctx: null,
+  bgmStarted: false,
+  
+  init() {
+    if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (this.ctx.state === 'suspended') this.ctx.resume();
+  },
+
+  async playAlert3Times() {
+    this.init();
+    for(let i=0; i<3; i++) {
+      const t = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(900, t);
+      osc.frequency.exponentialRampToValueAtTime(1200, t + 0.1);
+      gain.gain.setValueAtTime(0.08, t);
+      gain.gain.linearRampToValueAtTime(0, t + 0.5);
+      osc.connect(gain); gain.connect(this.ctx.destination);
+      osc.start(); osc.stop(t + 0.5);
+      await new Promise(r => setTimeout(r, 600));
+    }
+  },
+
+  playPhoneCall() {
+    this.init();
+    const t = this.ctx.currentTime;
+    const osc1 = this.ctx.createOscillator();
+    const osc2 = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc1.frequency.value = 440;
+    osc2.frequency.value = 480;
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(0.05, t + 0.1);
+    gain.gain.setValueAtTime(0.05, t + 1.2);
+    gain.gain.linearRampToValueAtTime(0, t + 1.3);
+    osc1.connect(gain); osc2.connect(gain); gain.connect(this.ctx.destination);
+    osc1.start(); osc2.start();
+    osc1.stop(t + 1.3); osc2.stop(t + 1.3);
+  },
+
+  playMissionStart() {
+    this.init();
+    const notes = [523.25, 659.25, 783.99, 1046.50]; 
+    const t = this.ctx.currentTime;
+    notes.forEach((freq, i) => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0, t + i * 0.1);
+      gain.gain.linearRampToValueAtTime(0.1, t + i * 0.1 + 0.05);
+      gain.gain.linearRampToValueAtTime(0, t + i * 0.1 + 0.4);
+      osc.connect(gain); gain.connect(this.ctx.destination);
+      osc.start(t + i * 0.1); osc.stop(t + i * 0.1 + 0.4);
+    });
+  },
+
+  playTechBGM() {
+    if(this.bgmStarted) return;
+    this.bgmStarted = true;
+    this.init();
+    const loop = () => {
+      const t = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(55, t); 
+      gain.gain.setValueAtTime(0.02, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = 400;
+      osc.connect(filter); filter.connect(gain); gain.connect(this.ctx.destination);
+      osc.start(); osc.stop(t + 0.5);
+      setTimeout(loop, 500); 
+    };
+    loop();
+  },
+
+  playType() {
+    this.init();
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = Math.random() * 400 + 800;
+    gain.gain.setValueAtTime(0.02, this.ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.05);
+    osc.connect(gain); gain.connect(this.ctx.destination);
+    osc.start(); osc.stop(this.ctx.currentTime + 0.05);
+  },
+
+  playScan() {
+    this.init();
+    const t = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(150, t);
+    osc.frequency.exponentialRampToValueAtTime(1800, t + 1.2);
+    gain.gain.setValueAtTime(0.08, t);
+    gain.gain.linearRampToValueAtTime(0, t + 1.2);
+    osc.connect(gain); gain.connect(this.ctx.destination);
+    osc.start(); osc.stop(t + 1.2);
+  },
+
+  playSuccessShort() {
+    this.init();
+    const t = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.frequency.setValueAtTime(880, t);
+    osc.frequency.exponentialRampToValueAtTime(1760, t + 0.1);
+    gain.gain.setValueAtTime(0.05, t);
+    gain.gain.linearRampToValueAtTime(0, t + 0.1);
+    osc.connect(gain); gain.connect(this.ctx.destination);
+    osc.start(); osc.stop(t + 0.1);
+  }
+};
+
+function createStars() {
+  const starsDiv = document.getElementById('stars');
+  for(let i=0; i<100; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = (Math.random() * 2 + 1) + 'px';
+    s.style.width = size; s.style.height = size;
+    s.style.top = Math.random() * 100 + '%';
+    s.style.left = Math.random() * 100 + '%';
+    s.style.animationDuration = (Math.random() * 3 + 2) + 's';
+    s.style.animationDelay = (Math.random() * 5) + 's';
+    starsDiv.appendChild(s);
+  }
+}
+createStars();
+
+async function checkPass() {
+  const input = document.getElementById("passInput");
+  const overlay = document.getElementById("startOverlay");
+  AudioEngine.init();
+  if (input.value === "0411") {
+    AudioEngine.playSuccessShort();
+    overlay.style.opacity = "0";
+    setTimeout(() => overlay.style.display = "none", 500);
+    startStory();
+  } else {
+    input.classList.add("error-shake");
+    setTimeout(() => { input.classList.remove("error-shake"); input.value = ""; }, 500);
+  }
+}
+
+async function startStory() {
+  AudioEngine.playTechBGM();
+  const dialog = document.getElementById("dialog");
+  document.getElementById("pigStarImg").style.display = "block";
+
+  AudioEngine.playAlert3Times();
+  for(let i=0; i<3; i++) {
+    dialog.innerHTML = `<div class="alert-text">緊急任務!!! 緊急任務!!!</div>`;
+    await wait(600); dialog.innerHTML = ""; await wait(400);
+  }
+
+  await typeText("我們要製作一個蛋糕🎂\n幫小豬慶祝生日", 80);
+  await wait(1200);
+  await typeText("現在要呼叫兩位重要隊員來完成!!!", 80);
+  await wait(1200);
+
+  document.getElementById("pigStarImg").style.display = "none";
+  document.getElementById("piggyImg").style.display = "block";
+  document.getElementById("cardArea").style.display = "block";
+  calling = true;
+  
+  while(calling) {
+    AudioEngine.playPhoneCall(); 
+    await typeText("呼叫中...呼叫中...", 100);
+    await wait(800);
+    if(!calling) break;
+    dialog.innerHTML = ""; await wait(400);
+  }
+}
+
+async function typeText(text, speed) {
+  const dialog = document.getElementById("dialog");
+  dialog.innerHTML = "<span></span>";
+  const target = dialog.querySelector("span");
+  for(let char of text) {
+    target.innerHTML += char;
+    if (char !== " " && char !== "\n") AudioEngine.playType();
+    if(!calling && text.includes("呼叫中")) return;
+    await wait(speed);
+  }
+}
+
+function scanCard(id) {
+  if(!calling || team.includes(id)) return;
+  team.push(id);
+  AudioEngine.playScan();
+  let card = document.getElementById(team.length === 1 ? "card1" : "card2");
+  card.classList.add("scanning");
+  card.querySelector(".card-footer").innerText = "掃描中...";
+  let img = document.createElement("img");
+  img.src = `images/characters/${id}.png`;
+  card.querySelector(".card-body").appendChild(img);
   setTimeout(() => {
-    // 執行跳轉
+    AudioEngine.playSuccessShort();
+    card.classList.remove("scanning", "waiting");
+    card.classList.add("active");
+    card.querySelector(".card-footer").innerText = names[id];
+    card.querySelector(".card-footer").classList.remove("blink");
+    if(team.length === 2) { calling = false; finishEnroll(); }
+  }, 1200);
+}
+
+function finishEnroll() {
+  const dialog = document.getElementById("dialog");
+  dialog.innerHTML = "";
+  setTimeout(() => {
+    typeText("召集完畢！準備上工！", 100);
+    document.getElementById("goBtn").style.display = "inline-block";
+  }, 500);
+}
+
+// 修改這裡：執行跳轉
+function goNext() { 
+  AudioEngine.playMissionStart(); 
+  // 延遲 800ms 讓「任務啟動」的琶音播放完畢再跳轉
+  setTimeout(() => {
     window.location.href = "makecake.html";
   }, 800);
 }
+
+const wait = ms => new Promise(r => setTimeout(r, ms));
+async function initNFC() {
+  if ("NDEFReader" in window) {
+    try {
+      const ndef = new NDEFReader();
+      await ndef.scan();
+      ndef.onreading = ({ message }) => {
+        for (const record of message.records) {
+          const textDecoder = new TextDecoder(record.encoding || "utf-8");
+          const rawData = textDecoder.decode(record.data).toLowerCase();
+          const matchedId = Object.keys(names).find(id => rawData.includes(id));
+          if (matchedId && !team.includes(matchedId) && calling) scanCard(matchedId);
+        }
+      };
+    } catch (e) { document.getElementById("testArea").style.display = "block"; }
+  } else { document.getElementById("testArea").style.display = "block"; }
+}
+initNFC();
+</script>
+</body>
+</html>

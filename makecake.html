@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>科技任務 - 蛋糕製作中 (音效強化版)</title>
+<style>
+@font-face {
+  font-family: 'ChenYuluoyan';
+  src: url('fonts/ChenYuluoyan-2.0-Thin.ttf') format('truetype');
+}
+
+body, html {
+  margin: 0; padding: 0; width: 100%; height: 100%;
+  background: radial-gradient(ellipse at center, #0b0c1a 0%, #1a1c33 100%);
+  color: #fff; font-family: 'ChenYuluoyan', sans-serif; overflow: hidden;
+  display: flex; flex-direction: column;
+}
+
+#gameStage { position: relative; flex: 1; width: 100%; overflow: hidden; }
+
+/* 角色基礎定位 */
+.char { position: absolute; bottom: 8%; transition: all 1s ease-out; object-fit: contain; opacity: 0; }
+#pigCommander { left: 5%; width: 38%; z-index: 10; bottom: 5%; transition-duration: 0.8s; } 
+
+#maoqiu { right: -40%; width: 28%; z-index: 15; transition-duration: 1.7s; } 
+#hachu { right: -60%; width: 22%; z-index: 20; transition-duration: 1.8s; } 
+
+.walking { animation: waddle 0.5s infinite ease-in-out; }
+@keyframes waddle {
+  0%, 100% { transform: rotate(-5deg); }
+  50% { transform: rotate(5deg); }
+}
+
+.happy-shake { animation: happyShake 0.4s infinite ease-in-out; }
+@keyframes happyShake {
+  0%, 100% { transform: translateX(0) rotate(0deg); }
+  25% { transform: translateX(-5px) rotate(-3deg); }
+  75% { transform: translateX(5px) rotate(3deg); }
+}
+
+.jump-swap { animation: jumpSwap 0.6s ease-in-out; }
+@keyframes jumpSwap {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-60px); }
+}
+
+.exit-move { 
+  transition: all 4s ease-in !important; 
+  left: 130% !important; 
+  opacity: 0 !important; 
+}
+
+#hachu.exit-move { transition-duration: 3s !important; transition-delay: 0s !important; z-index: 30; }
+#maoqiu.exit-move { transition-duration: 4s !important; transition-delay: 0.2s !important; z-index: 25; }
+#pigCommander.exit-move { transition-duration: 5s !important; transition-delay: 0.5s !important; z-index: 20; } 
+
+#recipeCard {
+  position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
+  background: rgba(0, 255, 255, 0.1); border: 2px solid #0ff;
+  padding: 12px 20px; border-radius: 12px; text-align: center; color: #0ff; 
+  font-size: 22px; box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
+  display: none; z-index: 50; backdrop-filter: blur(8px); width: 85%; line-height: 1.4;
+}
+
+#ingredientZones {
+  position: absolute; top: 130px; width: 100%;
+  display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;
+}
+.circle {
+  width: 55px; height: 55px; border: 2px solid #0ff;
+  border-radius: 50%; display: flex; align-items: center;
+  justify-content: center; font-size: 22px; color: #0ff;
+  background: rgba(0, 255, 255, 0.15);
+}
+.circle img { width: 85%; display: none; }
+
+#dialogContainer {
+  position: relative; width: calc(100% - 30px); height: 170px;
+  margin: 0 auto 20px auto; padding: 20px; box-sizing: border-box;
+  background: rgba(10, 20, 45, 0.95); border: 3px solid #0ff; border-radius: 12px;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.2); cursor: pointer; z-index: 40;
+}
+
+#speakerLabel {
+  position: absolute; top: -18px; left: 20px;
+  background: #0ff; color: #0b0c1a; padding: 4px 18px;
+  border-radius: 20px; font-weight: bold; font-size: 22px; box-shadow: 0 0 15px #0ff;
+}
+
+#dialogText { color: #fff; font-size: 26px; line-height: 1.4; margin-top: 10px; }
+
+#clickPrompt {
+  position: absolute; bottom: 15px; right: 20px;
+  width: 14px; height: 14px; background: #0ff;
+  border-radius: 50%; animation: radar 1s infinite; display: none;
+}
+
+@keyframes radar {
+  0% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(0, 255, 255, 0.7); }
+  100% { transform: scale(1.5); opacity: 0; box-shadow: 0 0 0 10px rgba(0, 255, 255, 0); }
+}
+
+#ovenImg {
+  position: absolute; top: 36%; left: 36%; transform: translate(-50%, -50%);
+  width: 200px; display: none; z-index: 5;
+  transition: opacity 2s ease-out;
+  opacity: 1;
+}
+
+#ovenImg.fade-out { opacity: 0; }
+
+.shake { animation: shakeAnim 0.3s infinite; }
+@keyframes shakeAnim {
+  0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
+  25% { transform: translate(-51%, -49%) rotate(-2deg); }
+  75% { transform: translate(-49%, -51%) rotate(2deg); }
+}
+
+#testBtnArea { position: fixed; top: 0; left: 0; z-index: 100; background: rgba(0,0,0,0.5); display: none; padding: 5px; }
+</style>
+</head>
+<body>
+
+<div id="gameStage">
+  <div id="recipeCard">蛋糖先舞，奶入成柔，<br>麥粉築體，奶油成香。</div>
+  <img id="pigCommander" class="char" src="images/characters/pigpigChef.png">
+  <img id="maoqiu" class="char" src="images/characters/maoqiuChef.png">
+  <img id="hachu" class="char" src="images/characters/hachuChef.png">
+  
+  <div id="ingredientZones">
+    <div class="circle" id="slot0">1</div>
+    <div class="circle" id="slot1">2</div>
+    <div class="circle" id="slot2">3</div>
+    <div class="circle" id="slot3">4</div>
+    <div class="circle" id="slot4">5</div>
+  </div>
+  <img id="ovenImg" src="images/oven.png">
+</div>
+
+<div id="dialogContainer" onclick="handleDialogClick()">
+  <div id="speakerLabel">SYSTEM</div>
+  <div id="dialogText"></div>
+  <div id="clickPrompt"></div>
+</div>
+
+<div id="testBtnArea">
+  <button onclick="handleNFC('egg')">蛋</button>
+  <button onclick="handleNFC('sugar')">糖</button>
+  <button onclick="handleNFC('milk')">奶</button>
+  <button onclick="handleNFC('flour')">麥</button>
+  <button onclick="handleNFC('butter')">油</button>
+  <button onclick="handleNFC('heart')">❤</button>
+  <button onclick="handleNFC('star')">⭐</button>
+</div>
+
+<script>
+// --- 音效引擎 (Web Audio API) ---
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+let bgmInterval = null;
+
+function initAudio() {
+    if (audioCtx) return;
+    audioCtx = new AudioCtx();
+}
+
+function playTone(freq, type, duration, volume = 0.1, fadeOut = true) {
+    if (!audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+    if (fadeOut) {
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+    }
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + duration);
+}
+
+const sfx = {
+    click: () => playTone(1000, 'sine', 0.05, 0.03),
+    correct: () => {
+        playTone(660, 'sine', 0.1, 0.1);
+        setTimeout(() => playTone(880, 'sine', 0.1, 0.1), 100);
+    },
+    wrong: () => {
+        playTone(220, 'sawtooth', 0.3, 0.05);
+        playTone(110, 'sawtooth', 0.3, 0.05);
+    },
+    ding: () => {
+        playTone(987, 'sine', 0.5, 0.15);
+        setTimeout(() => playTone(1318, 'sine', 0.4, 0.1), 50);
+    },
+    jump: () => {
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.frequency.setValueAtTime(400, now);
+        osc.frequency.exponentialRampToValueAtTime(900, now + 0.2);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.2);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(); osc.stop(now + 0.2);
+    }
+};
+
+function startBGM() {
+    if (bgmInterval) return;
+    const notes = [261.63, 329.63, 392.00, 523.25, 349.23, 440.00, 392.00, 329.63];
+    let step = 0;
+    bgmInterval = setInterval(() => {
+        if (gameState !== "exit") {
+            playTone(notes[step % notes.length], 'triangle', 0.3, 0.02);
+            step++;
+        }
+    }, 450);
+}
+
+// --- 遊戲邏輯 ---
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const order = ['egg', 'sugar', 'milk', 'flour', 'butter'];
+const imgMap = { 
+    egg: 'images/egg.png', sugar: 'images/sugar.png', milk: 'images/milk.png', 
+    flour: 'images/flour.png', butter: 'images/butter.png', heart: 'images/heart.png', star: 'images/star.png'
+};
+
+let currentIdx = 0;
+let gameState = "init"; 
+let canScan = false; 
+let dialogQueue = [];
+let isTyping = false;
+let rewardCount = { heart: 0, star: 0 };
+
+async function typeWriter(name, text, autoProceed = false) {
+  return new Promise(resolve => {
+    dialogQueue.push({ name, text, resolve, autoProceed });
+    if (!isTyping && dialogQueue.length === 1) processNextDialog();
+  });
+}
+
+async function processNextDialog() {
+  if (dialogQueue.length === 0) return;
+  isTyping = true;
+  const { name, text, autoProceed } = dialogQueue[0];
+  document.getElementById("speakerLabel").innerText = name;
+  const target = document.getElementById("dialogText");
+  const prompt = document.getElementById("clickPrompt");
+  target.innerHTML = ""; prompt.style.display = "none";
+  for(let char of text) { target.innerHTML += char; await wait(35); }
+  isTyping = false;
+  
+  if (autoProceed) {
+    if (text === "現在，請給我們一點獎勵吧！") {
+       const finishedDialog = dialogQueue[0];
+       if (finishedDialog.resolve) finishedDialog.resolve();
+       return; 
+    }
+    await wait(1200);
+    handleDialogClick(); 
+  } else {
+    prompt.style.display = "block";
+  }
+}
+
+async function handleDialogClick() {
+  // 啟動音訊 (需由點擊觸發)
+  if (!audioCtx) {
+      initAudio();
+      startBGM();
+  }
+  
+  if (isTyping || dialogQueue.length === 0) return;
+  
+  sfx.click(); // 對話點擊音
+
+  const currentMsg = dialogQueue[0].text;
+  if (currentMsg === "現在，請給我們一點獎勵吧！" && (rewardCount.heart < 1 || rewardCount.star < 2)) return;
+  
+  if (currentMsg.includes("重來一次吧")) {
+      document.getElementById("maoqiu").src = "images/characters/maoqiuChef.png";
+      document.getElementById("hachu").src = "images/characters/hachuChef.png";
+  }
+  
+  const finishedDialog = dialogQueue.shift();
+  if (finishedDialog.resolve) finishedDialog.resolve();
+  
+  if (currentMsg.includes("前往慶祝小豬生日")) exitScene();
+  if (dialogQueue.length > 0) processNextDialog();
+  else document.getElementById("clickPrompt").style.display = "none";
+}
+
+async function initScene() {
+  const pig = document.getElementById("pigCommander");
+  const mao = document.getElementById("maoqiu");
+  const ha = document.getElementById("hachu");
+
+  pig.style.opacity = "1";
+  await wait(1000);
+
+  mao.classList.add("walking");
+  mao.style.opacity = "1";
+  mao.style.right = "25%"; 
+  
+  ha.classList.add("walking");
+  ha.style.opacity = "1";
+  ha.style.right = "8%";
+
+  await wait(2000); 
+  mao.classList.remove("walking");
+  ha.classList.remove("walking");
+
+  await typeWriter("指揮官 豬豬", "毛球、哈啾聽令！製作蛋糕的秘方為：蛋糖先舞，奶入成柔，麥粉築體，奶油成香。");
+  document.getElementById("recipeCard").style.display = "block";
+  await typeWriter("毛球 & 哈啾", "收到！交給我們吧！一定要按順序來喔！");
+  startCollectionPhase();
+}
+
+async function startCollectionPhase() {
+  gameState = "collecting";
+  await typeWriter("系統提示", ">> 請開始感應食材卡片放進盤子中...", true);
+  canScan = true; 
+}
+
+async function handleNFC(id) {
+  if (!audioCtx) initAudio(); // 確保音訊有機會初始化
+  if (isTyping) return; 
+  if (gameState === "collecting" && canScan) {
+    if (dialogQueue.length > 0) return; 
+    if (id === order[currentIdx]) {
+      sfx.correct(); // 正確音
+      const slot = document.getElementById(`slot${currentIdx}`);
+      slot.innerHTML = `<img src="${imgMap[id]}" style="display:block">`;
+      currentIdx++;
+      if (navigator.vibrate) navigator.vibrate(100);
+      if (currentIdx === 5) { canScan = false; success(); }
+    } else if (order.includes(id)) {
+      sfx.wrong(); // 錯誤音
+      canScan = false; fail();
+    }
+  } 
+  else if (gameState === "baking" && canScan) processRewardAction(id);
+}
+
+async function success() {
+  gameState = "baking";
+  document.getElementById("recipeCard").style.display = "none"; 
+  await typeWriter("系統通知", "配方驗證成功。準備進入烘焙程序...", true);
+  const oven = document.getElementById("ovenImg");
+  const chars = document.querySelectorAll(".char");
+  document.getElementById("ingredientZones").style.display = "none";
+  oven.style.display = "block"; 
+  oven.classList.add("shake");
+  chars.forEach(c => c.classList.add("happy-shake"));
+  
+  for (let i = 1; i <= 3; i++) {
+      playTone(300, 'triangle', 0.2, 0.05); // 烘烤聲
+      await typeWriter("系統通知", `蛋糕烘焙中...`, true);
+  }
+  
+  sfx.ding(); // 完成音
+  oven.classList.remove("shake");
+  chars.forEach(c => c.classList.remove("happy-shake"));
+  await typeWriter("系統通知", "叮！烘烤完畢！", true);
+  await typeWriter("指揮官 豬豬", "太棒了！蛋糕香味飄出來了，大家做得很好。");
+  canScan = true; 
+  await typeWriter("指揮官 豬豬", "現在，請給我們一點獎勵吧！", true);
+}
+
+async function fail() {
+  document.getElementById("maoqiu").src = "images/characters/maoqiuChef_nono.png";
+  document.getElementById("hachu").src = "images/characters/hachuChef_nono.png";
+  await typeWriter("指揮官 豬豬", "偵測到配方錯誤！程序重置。");
+  await typeWriter("毛球 & 哈啾", "嗚嗚... 我們弄錯了，重來一次吧！");
+  currentIdx = 0;
+  for(let i=0; i<5; i++) document.getElementById(`slot${i}`).innerHTML = i+1;
+  if (navigator.vibrate) navigator.vibrate(500);
+  startCollectionPhase();
+}
+
+async function processRewardAction(id) {
+  const pig = document.getElementById("pigCommander");
+  const mao = document.getElementById("maoqiu");
+  const ha = document.getElementById("hachu");
+  
+  if (id === 'heart' && rewardCount.heart < 1) {
+    sfx.jump(); // 跳躍滑音
+    rewardCount.heart++;
+    pig.classList.add("jump-swap");
+    setTimeout(() => { pig.src = "images/characters/pigpig_happy.png"; }, 300);
+    setTimeout(() => { pig.classList.remove("jump-swap"); }, 600);
+    checkRewardComplete();
+  } 
+  else if (id === 'star' && rewardCount.star < 2) {
+    sfx.jump(); // 跳躍滑音
+    rewardCount.star++;
+    if (rewardCount.star === 1) {
+      mao.classList.add("jump-swap");
+      setTimeout(() => { mao.src = "images/characters/maoqiu_happy.png"; }, 300);
+      setTimeout(() => { mao.classList.remove("jump-swap"); }, 600);
+    } else if (rewardCount.star === 2) {
+      ha.classList.add("jump-swap");
+      setTimeout(() => { ha.src = "images/characters/hachu_happy.png"; }, 300);
+      setTimeout(() => { ha.classList.remove("jump-swap"); }, 600);
+    }
+    checkRewardComplete();
+  }
+}
+
+async function checkRewardComplete() {
+  if (rewardCount.heart >= 1 && rewardCount.star >= 2) {
+    canScan = false; 
+    await wait(800);
+    dialogQueue.shift(); 
+    await typeWriter("豬豬 & 毛球 & 哈啾", "我們都收到獎勵了！謝謝小豬！", true);
+    await typeWriter("指揮官 豬豬", "12...12...出發吧！前往慶祝小豬生日！");
+  }
+}
+
+async function exitScene() {
+  gameState = "exit";
+  if (bgmInterval) clearInterval(bgmInterval);
+  
+  const pig = document.getElementById("pigCommander");
+  const mao = document.getElementById("maoqiu");
+  const ha = document.getElementById("hachu");
+  const oven = document.getElementById("ovenImg");
+
+  mao.src = "images/characters/maoqiu_happygo.png"; 
+  ha.src = "images/characters/hachu_happygo.png";   
+
+  mao.style.left = window.getComputedStyle(mao).left;
+  mao.style.right = "auto";
+  ha.style.left = window.getComputedStyle(ha).left;
+  ha.style.right = "auto";
+  pig.style.left = window.getComputedStyle(pig).left;
+
+  await wait(100);
+
+  [ha, mao, pig].forEach(c => {
+    c.classList.add("walking");
+    c.classList.add("exit-move");
+  });
+
+  await wait(1500); 
+  oven.classList.add("fade-out");
+
+  await wait(4000); 
+  alert("慶生會開始囉！前往慶祝會場...");
+}
+
+async function initNFC() {
+  if ("NDEFReader" in window) {
+    try {
+      const ndef = new NDEFReader();
+      await ndef.scan();
+      ndef.onreading = ({ message }) => {
+        const decoder = new TextDecoder();
+        for (const record of message.records) {
+          const data = decoder.decode(record.data).toLowerCase();
+          const ids = ['egg','sugar','milk','flour','butter','heart','star'];
+          const found = ids.find(x => data.includes(x));
+          if(found) handleNFC(found);
+        }
+      };
+    } catch(e) { document.getElementById("testBtnArea").style.display="block"; }
+  } else { document.getElementById("testBtnArea").style.display="block"; }
+}
+
+initScene();
+initNFC();
+</script>
+</body>
+</html>

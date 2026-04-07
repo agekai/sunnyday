@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>科技任務 - 蛋糕製作中 (音效強化版)</title>
+<title>科技任務 - 蛋糕製作中 (轉場強化版)</title>
 <style>
 @font-face {
   font-family: 'ChenYuluoyan';
@@ -45,6 +45,7 @@ body, html {
   50% { transform: translateY(-60px); }
 }
 
+/* 離場動畫 */
 .exit-move { 
   transition: all 4s ease-in !important; 
   left: 130% !important; 
@@ -117,6 +118,13 @@ body, html {
   75% { transform: translate(-49%, -51%) rotate(2deg); }
 }
 
+/* 轉場遮罩層 */
+#fadeOverlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: #0b0c1a; opacity: 0; pointer-events: none;
+  transition: opacity 1.5s ease-in-out; z-index: 999;
+}
+
 #testBtnArea { position: fixed; top: 0; left: 0; z-index: 100; background: rgba(0,0,0,0.5); display: none; padding: 5px; }
 </style>
 </head>
@@ -144,6 +152,8 @@ body, html {
   <div id="clickPrompt"></div>
 </div>
 
+<div id="fadeOverlay"></div>
+
 <div id="testBtnArea">
   <button onclick="handleNFC('egg')">蛋</button>
   <button onclick="handleNFC('sugar')">糖</button>
@@ -155,7 +165,7 @@ body, html {
 </div>
 
 <script>
-// --- 音效引擎 (Web Audio API) ---
+// --- 音效引擎 ---
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let audioCtx = null;
 let bgmInterval = null;
@@ -267,7 +277,6 @@ async function processNextDialog() {
 }
 
 async function handleDialogClick() {
-  // 啟動音訊 (需由點擊觸發)
   if (!audioCtx) {
       initAudio();
       startBGM();
@@ -275,7 +284,7 @@ async function handleDialogClick() {
   
   if (isTyping || dialogQueue.length === 0) return;
   
-  sfx.click(); // 對話點擊音
+  sfx.click();
 
   const currentMsg = dialogQueue[0].text;
   if (currentMsg === "現在，請給我們一點獎勵吧！" && (rewardCount.heart < 1 || rewardCount.star < 2)) return;
@@ -288,7 +297,9 @@ async function handleDialogClick() {
   const finishedDialog = dialogQueue.shift();
   if (finishedDialog.resolve) finishedDialog.resolve();
   
+  // 檢查是否點擊了觸發離場的對話
   if (currentMsg.includes("前往慶祝小豬生日")) exitScene();
+  
   if (dialogQueue.length > 0) processNextDialog();
   else document.getElementById("clickPrompt").style.display = "none";
 }
@@ -326,19 +337,19 @@ async function startCollectionPhase() {
 }
 
 async function handleNFC(id) {
-  if (!audioCtx) initAudio(); // 確保音訊有機會初始化
+  if (!audioCtx) initAudio();
   if (isTyping) return; 
   if (gameState === "collecting" && canScan) {
     if (dialogQueue.length > 0) return; 
     if (id === order[currentIdx]) {
-      sfx.correct(); // 正確音
+      sfx.correct();
       const slot = document.getElementById(`slot${currentIdx}`);
       slot.innerHTML = `<img src="${imgMap[id]}" style="display:block">`;
       currentIdx++;
       if (navigator.vibrate) navigator.vibrate(100);
       if (currentIdx === 5) { canScan = false; success(); }
     } else if (order.includes(id)) {
-      sfx.wrong(); // 錯誤音
+      sfx.wrong();
       canScan = false; fail();
     }
   } 
@@ -357,11 +368,11 @@ async function success() {
   chars.forEach(c => c.classList.add("happy-shake"));
   
   for (let i = 1; i <= 3; i++) {
-      playTone(300, 'triangle', 0.2, 0.05); // 烘烤聲
+      playTone(300, 'triangle', 0.2, 0.05);
       await typeWriter("系統通知", `蛋糕烘焙中...`, true);
   }
   
-  sfx.ding(); // 完成音
+  sfx.ding();
   oven.classList.remove("shake");
   chars.forEach(c => c.classList.remove("happy-shake"));
   await typeWriter("系統通知", "叮！烘烤完畢！", true);
@@ -387,7 +398,7 @@ async function processRewardAction(id) {
   const ha = document.getElementById("hachu");
   
   if (id === 'heart' && rewardCount.heart < 1) {
-    sfx.jump(); // 跳躍滑音
+    sfx.jump();
     rewardCount.heart++;
     pig.classList.add("jump-swap");
     setTimeout(() => { pig.src = "images/characters/pigpig_happy.png"; }, 300);
@@ -395,7 +406,7 @@ async function processRewardAction(id) {
     checkRewardComplete();
   } 
   else if (id === 'star' && rewardCount.star < 2) {
-    sfx.jump(); // 跳躍滑音
+    sfx.jump();
     rewardCount.star++;
     if (rewardCount.star === 1) {
       mao.classList.add("jump-swap");
@@ -420,6 +431,7 @@ async function checkRewardComplete() {
   }
 }
 
+// --- 跳轉核心邏輯 (修正版：角色完全退場後才暗幕) ---
 async function exitScene() {
   gameState = "exit";
   if (bgmInterval) clearInterval(bgmInterval);
@@ -429,9 +441,11 @@ async function exitScene() {
   const ha = document.getElementById("hachu");
   const oven = document.getElementById("ovenImg");
 
+  // 1. 切換為出發/快樂跑步狀態的圖片
   mao.src = "images/characters/maoqiu_happygo.png"; 
   ha.src = "images/characters/hachu_happygo.png";   
 
+  // 2. 鎖定當前坐標並準備向右衝刺
   mao.style.left = window.getComputedStyle(mao).left;
   mao.style.right = "auto";
   ha.style.left = window.getComputedStyle(ha).left;
@@ -440,16 +454,27 @@ async function exitScene() {
 
   await wait(100);
 
+  // 3. 角色全體開始向右離場 (CSS 中設定了 3~5 秒的 transition)
   [ha, mao, pig].forEach(c => {
     c.classList.add("walking");
     c.classList.add("exit-move");
   });
 
-  await wait(1500); 
+  // 4. 烤箱先行淡出 (讓視覺焦點集中在移動的角色身上)
+  await wait(1000); 
   oven.classList.add("fade-out");
 
-  await wait(4000); 
-  alert("慶生會開始囉！前往慶祝會場...");
+  // 5. 重要修正：等待豬豬指揮官（最慢的一位，耗時5秒）快要完全走出場外時
+  // 我們設定在 4 秒左右開始暗幕，這樣視覺上最流暢
+  await wait(3000); 
+
+  // 6. 畫面開始變黑淡出
+  const overlay = document.getElementById("fadeOverlay");
+  overlay.style.opacity = "1";
+
+  // 7. 等待暗幕完全覆蓋後（CSS transition 是 1.5s），執行跳轉
+  await wait(1500); 
+  window.location.href = "celebrate.html"; 
 }
 
 async function initNFC() {

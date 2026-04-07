@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>科技任務 - 生日快樂！</title>
+<style>
+@font-face {
+  font-family: 'ChenYuluoyan';
+  src: url('fonts/ChenYuluoyan-2.0-Thin.ttf') format('truetype');
+}
+
+body, html {
+  margin: 0; padding: 0; width: 100%; height: 100%;
+  background: radial-gradient(circle, #fff5f5 0%, #ffd1d1 100%);
+  color: #333; font-family: 'ChenYuluoyan', sans-serif; overflow: hidden;
+  display: flex; flex-direction: column; align-items: center;
+}
+
+/* 整體內容容器 - 往上移動的關鍵 */
+#mainStage {
+  position: relative; flex: 1; width: 100%; 
+  display: flex; flex-direction: column; align-items: center; 
+  justify-content: flex-start; /* 改為從頂部開始排版 */
+  padding-top: 40px; /* 控制頂部留白 */
+  opacity: 0; animation: fadeInPage 1.5s forwards;
+}
+
+@keyframes fadeInPage { from { opacity: 0; } to { opacity: 1; } }
+
+/* 頂部文字區塊 */
+#header { 
+  text-align: center; 
+  z-index: 20; 
+  margin-bottom: 20px; /* 縮短與蛋糕的距離 */
+}
+#header h1 {
+  font-size: 46px; color: #ff4757; text-shadow: 3px 3px 0px #fff;
+  margin: 0; animation: bounce 0.6s infinite alternate;
+}
+#header p { font-size: 24px; color: #ff7f7f; margin: 5px 0; font-weight: bold; }
+
+@keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-8px); } }
+
+/* 蛋糕浮動動畫 - 位置調高 */
+#cakeContainer {
+  position: relative; 
+  margin-top: 10px; /* 蛋糕往上提 */
+  animation: float 3s infinite ease-in-out;
+  z-index: 10;
+}
+#finalCake { width: 260px; filter: drop-shadow(0 15px 25px rgba(255,100,100,0.3)); transition: transform 0.2s; }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(-1deg); }
+  50% { transform: translateY(-20px) rotate(1deg); }
+}
+
+/* 角色配置 - 維持在底部稍微偏上的位置 */
+.char-group {
+  position: absolute; bottom: 15%; width: 100%;
+  display: flex; justify-content: space-around; align-items: flex-end;
+  padding: 0 5%; box-sizing: border-box;
+}
+.char { width: 30%; max-width: 130px; object-fit: contain; transform: scale(0); animation: popIn 0.8s cubic-bezier(0.17, 0.67, 0.83, 1.3) forwards; }
+#pig { animation-delay: 0.5s; width: 40%; }
+#mao { animation-delay: 0.8s; }
+#ha { animation-delay: 1.1s; }
+
+@keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
+
+/* 五彩碎紙系統 */
+.confetti {
+  position: absolute; width: 12px; height: 12px; opacity: 0;
+  animation: confettiFall 4s linear infinite;
+}
+@keyframes confettiFall {
+  0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
+
+/* 按鈕位置微調 */
+#actionBtn {
+  position: absolute; bottom: 40px;
+  padding: 12px 35px; background: linear-gradient(135deg, #ff4757, #ff6b81);
+  color: #fff; border-radius: 50px; font-size: 22px; border: none;
+  box-shadow: 0 8px 20px rgba(255, 71, 87, 0.4); cursor: pointer;
+  z-index: 100; font-family: 'ChenYuluoyan';
+}
+</style>
+</head>
+<body>
+
+<div id="mainStage">
+  <div id="header">
+    <h1>Happy Birthday!</h1>
+    <p>小豬生日快樂！任務大成功！</p>
+  </div>
+
+  <div id="cakeContainer">
+    <img id="finalCake" src="images/final_cake.png">
+  </div>
+
+  <div class="char-group">
+    <img id="mao" class="char" src="images/characters/maoqiu_happy.png">
+    <img id="pig" class="char" src="images/characters/pigpig_happy.png">
+    <img id="ha" class="char" src="images/characters/hachu_happy.png">
+  </div>
+
+  <button id="actionBtn" onclick="location.href='index.html'">再玩一次</button>
+</div>
+
+<script>
+// --- 音效引擎 (生日快樂歌精準版) ---
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+let isPlaying = false;
+
+const FREQ = {
+    C4: 261.63, D4: 293.66, E4: 329.63, F4: 349.23, G4: 392.00, A4: 440.00, Bb4: 466.16, C5: 523.25
+};
+
+const song = [
+    ['C4', 0.75], ['C4', 0.25], ['D4', 1], ['C4', 1], ['F4', 1], ['E4', 2],
+    ['C4', 0.75], ['C4', 0.25], ['D4', 1], ['C4', 1], ['G4', 1], ['F4', 2],
+    ['C4', 0.75], ['C4', 0.25], ['C5', 1], ['A4', 1], ['F4', 1], ['E4', 1], ['D4', 2],
+    ['Bb4', 0.75], ['Bb4', 0.25], ['A4', 1], ['F4', 1], ['G4', 1], ['F4', 2]
+];
+
+function playNote(freq, startTime, duration) {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'triangle'; 
+    osc.frequency.setValueAtTime(freq, startTime);
+    gain.gain.setValueAtTime(0, startTime);
+    gain.gain.linearRampToValueAtTime(0.12, startTime + 0.05); 
+    gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration); 
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(startTime);
+    osc.stop(startTime + duration + 0.1);
+}
+
+function startSong() {
+    if (isPlaying) return;
+    if (!audioCtx) audioCtx = new AudioCtx();
+    isPlaying = true;
+    let currentTime = audioCtx.currentTime + 0.1;
+    const tempo = 0.52;
+    song.forEach(([note, duration]) => {
+        playNote(FREQ[note], currentTime, duration * tempo);
+        currentTime += duration * tempo;
+    });
+    setTimeout(() => { isPlaying = false; }, (currentTime - audioCtx.currentTime) * 1000);
+}
+
+function createConfetti() {
+    const colors = ['#ff4757', '#2ed573', '#1e90ff', '#ffa502', '#ffffff', '#eccc68'];
+    for (let i = 0; i < 65; i++) {
+        const div = document.createElement('div');
+        div.className = 'confetti';
+        div.style.left = Math.random() * 100 + 'vw';
+        div.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        div.style.animationDelay = Math.random() * 5 + 's';
+        div.style.width = Math.random() * 10 + 6 + 'px';
+        div.style.height = div.style.width;
+        div.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+        document.body.appendChild(div);
+    }
+}
+
+window.addEventListener('click', () => {
+    startSong();
+    const cake = document.getElementById('finalCake');
+    cake.style.transform = 'scale(1.1)';
+    setTimeout(() => { cake.style.transform = 'scale(1)'; }, 200);
+});
+
+window.onload = () => { createConfetti(); };
+</script>
+</body>
+</html>

@@ -141,6 +141,40 @@ const song = [
     ['Bb4', 0.75], ['Bb4', 0.25], ['A4', 1], ['F4', 1], ['G4', 1], ['F4', 2]
 ];
 
+// 核心觸發函式：音樂 + 視覺動畫
+function triggerCelebration() {
+    if (isPlaying) return;
+    
+    // 1. 播放音樂邏輯
+    if (!audioCtx) audioCtx = new AudioCtx();
+    isPlaying = true;
+    togglePartyMode(true);
+
+    let currentTime = audioCtx.currentTime + 0.1;
+    const tempo = 0.52;
+    song.forEach(([note, duration]) => {
+        playNote(FREQ[note], currentTime, duration * tempo);
+        currentTime += duration * tempo;
+    });
+
+    const totalDuration = (currentTime - audioCtx.currentTime) * 1000;
+    setTimeout(() => { 
+        isPlaying = false; 
+        togglePartyMode(false); 
+    }, totalDuration);
+
+    // 2. 視覺回饋動畫
+    const cake = document.getElementById('finalCake');
+    cake.style.transform = 'scale(1.1)';
+    setTimeout(() => { cake.style.transform = 'scale(1)'; }, 200);
+
+    const chars = document.querySelectorAll('.char');
+    chars.forEach(c => {
+        c.style.transform = 'scale(1.15) translateY(-10px)';
+        setTimeout(() => { c.style.transform = 'scale(1) translateY(0)'; }, 200);
+    });
+}
+
 function playNote(freq, startTime, duration) {
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
@@ -162,43 +196,7 @@ function togglePartyMode(isParty) {
     });
 }
 
-// 核心觸發函式 (音樂 + 動畫)
-function triggerBirthdayEvent() {
-    if (isPlaying) return;
-    if (!audioCtx) audioCtx = new AudioCtx();
-    startSong();
-    
-    // 視覺回饋
-    const cake = document.getElementById('finalCake');
-    cake.style.transform = 'scale(1.1)';
-    setTimeout(() => { cake.style.transform = 'scale(1)'; }, 200);
-
-    const chars = document.querySelectorAll('.char');
-    chars.forEach(c => {
-        c.style.transform = 'scale(1.15) translateY(-10px)';
-        setTimeout(() => { c.style.transform = 'scale(1) translateY(0)'; }, 200);
-    });
-}
-
-function startSong() {
-    isPlaying = true;
-    togglePartyMode(true);
-
-    let currentTime = audioCtx.currentTime + 0.1;
-    const tempo = 0.52;
-    song.forEach(([note, duration]) => {
-        playNote(FREQ[note], currentTime, duration * tempo);
-        currentTime += duration * tempo;
-    });
-
-    const totalDuration = (currentTime - audioCtx.currentTime) * 1000;
-    setTimeout(() => { 
-        isPlaying = false; 
-        togglePartyMode(false);
-    }, totalDuration);
-}
-
-// NFC 初始化
+// NFC 監聽初始化
 async function initNFC() {
     if ("NDEFReader" in window) {
         try {
@@ -207,22 +205,15 @@ async function initNFC() {
             console.log("NFC 掃描已啟動");
 
             ndef.addEventListener("reading", ({ message, serialNumber }) => {
-                // 這裡檢查卡片內容或 ID。若卡片內有寫入文字 "mac"
-                const decoder = new TextDecoder();
-                for (const record of message.records) {
-                    const text = decoder.decode(record.data);
-                    if (text === "mac") {
-                        triggerBirthdayEvent();
-                    }
-                }
-                // 如果是檢查卡片 ID (序號)，可以視需求加入判定
-                // triggerBirthdayEvent(); 
+                console.log(`發現 NFC 卡片: ${serialNumber}`);
+                triggerCelebration(); // 感應到卡片即觸發
             });
         } catch (error) {
-            console.log("NFC 啟動失敗或被拒絕: " + error);
+            console.log("NFC 啟動失敗: " + error);
+            // 這裡不報錯，因為用戶可以用點擊的方式
         }
     } else {
-        console.log("此裝置不支援 NFC");
+        console.log("此裝置不支援 Web NFC");
     }
 }
 
@@ -241,16 +232,15 @@ function createConfetti() {
     }
 }
 
-// 點擊事件：同時作為傳統觸發與 NFC 啟動開關
+// 點擊觸發保留（作為替代方案）
 window.addEventListener('click', () => {
-    // 1. 嘗試啟動 NFC (如果是第一次點擊且手機支援，會跳出權限請求)
-    initNFC();
-    
-    // 2. 執行原本的點擊觸發功能
-    triggerBirthdayEvent();
+    triggerCelebration();
 });
 
-window.onload = () => { createConfetti(); };
+window.onload = () => { 
+    createConfetti(); 
+    initNFC(); // 頁面載入後自動嘗試啟動 NFC 監聽
+};
 </script>
 </script>
 </body>

@@ -426,7 +426,8 @@ async function checkRewardComplete() {
     canScan = false; 
     await wait(800);
     dialogQueue.shift(); 
-    await typeWriter("豬豬 & 毛球 & 哈啾", "我們都收到獎勵了！謝謝小豬！", true);
+    // 修改處：將 true 改為 false，讓這句話需要點擊才能繼續
+    await typeWriter("豬豬 & 毛球 & 哈啾", "我們都收到獎勵了！謝謝小豬！", false);
     await typeWriter("指揮官 豬豬", "12...12...出發吧！前往慶祝小豬生日！");
   }
 }

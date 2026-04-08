@@ -17,23 +17,17 @@ body, html {
   display: flex; flex-direction: column; align-items: center;
 }
 
-/* 整體內容容器 - 往上移動的關鍵 */
 #mainStage {
   position: relative; flex: 1; width: 100%; 
   display: flex; flex-direction: column; align-items: center; 
-  justify-content: flex-start; /* 改為從頂部開始排版 */
-  padding-top: 40px; /* 控制頂部留白 */
+  justify-content: flex-start; 
+  padding-top: 40px; 
   opacity: 0; animation: fadeInPage 1.5s forwards;
 }
 
 @keyframes fadeInPage { from { opacity: 0; } to { opacity: 1; } }
 
-/* 頂部文字區塊 */
-#header { 
-  text-align: center; 
-  z-index: 20; 
-  margin-bottom: 20px; /* 縮短與蛋糕的距離 */
-}
+#header { text-align: center; z-index: 20; margin-bottom: 20px; }
 #header h1 {
   font-size: 46px; color: #ff4757; text-shadow: 3px 3px 0px #fff;
   margin: 0; animation: bounce 0.6s infinite alternate;
@@ -42,34 +36,39 @@ body, html {
 
 @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-8px); } }
 
-/* 蛋糕浮動動畫 - 位置調高 */
 #cakeContainer {
   position: relative; 
-  margin-top: 10px; /* 蛋糕往上提 */
+  margin-top: 30px; 
   animation: float 3s infinite ease-in-out;
   z-index: 10;
 }
-#finalCake { width: 260px; filter: drop-shadow(0 15px 25px rgba(255,100,100,0.3)); transition: transform 0.2s; }
+#finalCake { width: 240px; filter: drop-shadow(0 15px 25px rgba(255,100,100,0.3)); transition: transform 0.2s; }
 
 @keyframes float {
   0%, 100% { transform: translateY(0) rotate(-1deg); }
   50% { transform: translateY(-20px) rotate(1deg); }
 }
 
-/* 角色配置 - 維持在底部稍微偏上的位置 */
 .char-group {
-  position: absolute; bottom: 15%; width: 100%;
-  display: flex; justify-content: space-around; align-items: flex-end;
-  padding: 0 5%; box-sizing: border-box;
+  position: absolute; bottom: 12%; width: 100%;
+  display: flex; justify-content: center; align-items: flex-end;
+  gap: 10px; padding: 0 10px; box-sizing: border-box;
 }
-.char { width: 30%; max-width: 130px; object-fit: contain; transform: scale(0); animation: popIn 0.8s cubic-bezier(0.17, 0.67, 0.83, 1.3) forwards; }
-#pig { animation-delay: 0.5s; width: 40%; }
-#mao { animation-delay: 0.8s; }
-#ha { animation-delay: 1.1s; }
+.char { 
+  width: 22%; max-width: 100px; 
+  object-fit: contain; 
+  transform: scale(0); 
+  animation: popIn 0.8s cubic-bezier(0.17, 0.67, 0.83, 1.3) forwards; 
+  transition: transform 0.2s, filter 0.3s;
+}
+
+#pig { animation-delay: 0.5s; width: 28%; max-width: 120px; }
+#mao { animation-delay: 0.7s; }
+#sunny { animation-delay: 0.9s; }
+#ha { animation-delay: 1.1s; width: 18%;max-width: 80px;} /* 整體變小（原本是 22%） */   /* 最大寬度也縮小（原本是 100px） */
 
 @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
 
-/* 五彩碎紙系統 */
 .confetti {
   position: absolute; width: 12px; height: 12px; opacity: 0;
   animation: confettiFall 4s linear infinite;
@@ -79,9 +78,8 @@ body, html {
   100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
 }
 
-/* 按鈕位置微調 */
 #actionBtn {
-  position: absolute; bottom: 40px;
+  position: absolute; bottom: 30px;
   padding: 12px 35px; background: linear-gradient(135deg, #ff4757, #ff6b81);
   color: #fff; border-radius: 50px; font-size: 22px; border: none;
   box-shadow: 0 8px 20px rgba(255, 71, 87, 0.4); cursor: pointer;
@@ -102,16 +100,32 @@ body, html {
   </div>
 
   <div class="char-group">
-    <img id="mao" class="char" src="images/characters/maoqiu_happy.png">
-    <img id="pig" class="char" src="images/characters/pigpig_happy.png">
-    <img id="ha" class="char" src="images/characters/hachu_happy.png">
+    <!-- 加入 data-normal 和 data-party 屬性來儲存圖片路徑 -->
+    <img id="mao" class="char" 
+         src="images/characters/maoqiustar.png" 
+         data-normal="images/characters/maoqiustar.png" 
+         data-party="images/characters/maoqiu_party.png">
+         
+    <img id="pig" class="char" 
+         src="images/characters/pigstar.png" 
+         data-normal="images/characters/pigstar.png" 
+         data-party="images/characters/pigstar_party.png">
+
+    <img id="sunny" class="char" 
+         src="images/characters/sunnypig.png" 
+         data-normal="images/characters/sunnypig.png" 
+         data-party="images/characters/sunnypig_party.png">
+
+    <img id="ha" class="char" 
+         src="images/characters/hachustar.png" 
+         data-normal="images/characters/hachustar.png" 
+         data-party="images/characters/hachu_party.png">
   </div>
 
-  <button id="actionBtn" onclick="location.href='index.html'">再玩一次</button>
+  <button id="actionBtn" onclick="location.href='index.html'">sunny day</button>
 </div>
 
 <script>
-// --- 音效引擎 (生日快樂歌精準版) ---
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let audioCtx = null;
 let isPlaying = false;
@@ -141,17 +155,75 @@ function playNote(freq, startTime, duration) {
     osc.stop(startTime + duration + 0.1);
 }
 
-function startSong() {
+function togglePartyMode(isParty) {
+    const chars = document.querySelectorAll('.char');
+    chars.forEach(c => {
+        c.src = isParty ? c.getAttribute('data-party') : c.getAttribute('data-normal');
+    });
+}
+
+// 核心觸發函式 (音樂 + 動畫)
+function triggerBirthdayEvent() {
     if (isPlaying) return;
     if (!audioCtx) audioCtx = new AudioCtx();
+    startSong();
+    
+    // 視覺回饋
+    const cake = document.getElementById('finalCake');
+    cake.style.transform = 'scale(1.1)';
+    setTimeout(() => { cake.style.transform = 'scale(1)'; }, 200);
+
+    const chars = document.querySelectorAll('.char');
+    chars.forEach(c => {
+        c.style.transform = 'scale(1.15) translateY(-10px)';
+        setTimeout(() => { c.style.transform = 'scale(1) translateY(0)'; }, 200);
+    });
+}
+
+function startSong() {
     isPlaying = true;
+    togglePartyMode(true);
+
     let currentTime = audioCtx.currentTime + 0.1;
     const tempo = 0.52;
     song.forEach(([note, duration]) => {
         playNote(FREQ[note], currentTime, duration * tempo);
         currentTime += duration * tempo;
     });
-    setTimeout(() => { isPlaying = false; }, (currentTime - audioCtx.currentTime) * 1000);
+
+    const totalDuration = (currentTime - audioCtx.currentTime) * 1000;
+    setTimeout(() => { 
+        isPlaying = false; 
+        togglePartyMode(false);
+    }, totalDuration);
+}
+
+// NFC 初始化
+async function initNFC() {
+    if ("NDEFReader" in window) {
+        try {
+            const ndef = new NDEFReader();
+            await ndef.scan();
+            console.log("NFC 掃描已啟動");
+
+            ndef.addEventListener("reading", ({ message, serialNumber }) => {
+                // 這裡檢查卡片內容或 ID。若卡片內有寫入文字 "mac"
+                const decoder = new TextDecoder();
+                for (const record of message.records) {
+                    const text = decoder.decode(record.data);
+                    if (text === "mac") {
+                        triggerBirthdayEvent();
+                    }
+                }
+                // 如果是檢查卡片 ID (序號)，可以視需求加入判定
+                // triggerBirthdayEvent(); 
+            });
+        } catch (error) {
+            console.log("NFC 啟動失敗或被拒絕: " + error);
+        }
+    } else {
+        console.log("此裝置不支援 NFC");
+    }
 }
 
 function createConfetti() {
@@ -169,14 +241,17 @@ function createConfetti() {
     }
 }
 
+// 點擊事件：同時作為傳統觸發與 NFC 啟動開關
 window.addEventListener('click', () => {
-    startSong();
-    const cake = document.getElementById('finalCake');
-    cake.style.transform = 'scale(1.1)';
-    setTimeout(() => { cake.style.transform = 'scale(1)'; }, 200);
+    // 1. 嘗試啟動 NFC (如果是第一次點擊且手機支援，會跳出權限請求)
+    initNFC();
+    
+    // 2. 執行原本的點擊觸發功能
+    triggerBirthdayEvent();
 });
 
 window.onload = () => { createConfetti(); };
+</script>
 </script>
 </body>
 </html>

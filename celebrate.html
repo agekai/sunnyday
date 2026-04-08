@@ -129,6 +129,7 @@ body, html {
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let audioCtx = null;
 let isPlaying = false;
+let isNFCOnly = false; // 新增：用來標記是否已啟用 NFC 模式
 
 const FREQ = {
     C4: 261.63, D4: 293.66, E4: 329.63, F4: 349.23, G4: 392.00, A4: 440.00, Bb4: 466.16, C5: 523.25
@@ -141,11 +142,10 @@ const song = [
     ['Bb4', 0.75], ['Bb4', 0.25], ['A4', 1], ['F4', 1], ['G4', 1], ['F4', 2]
 ];
 
-// 核心觸發函式：音樂 + 視覺動畫
+// 核心觸發函式
 function triggerCelebration() {
     if (isPlaying) return;
     
-    // 1. 播放音樂邏輯
     if (!audioCtx) audioCtx = new AudioCtx();
     isPlaying = true;
     togglePartyMode(true);
@@ -163,7 +163,7 @@ function triggerCelebration() {
         togglePartyMode(false); 
     }, totalDuration);
 
-    // 2. 視覺回饋動畫
+    // 動畫效果
     const cake = document.getElementById('finalCake');
     cake.style.transform = 'scale(1.1)';
     setTimeout(() => { cake.style.transform = 'scale(1)'; }, 200);
@@ -196,24 +196,24 @@ function togglePartyMode(isParty) {
     });
 }
 
-// NFC 監聽初始化
+// NFC 初始化
 async function initNFC() {
     if ("NDEFReader" in window) {
         try {
             const ndef = new NDEFReader();
             await ndef.scan();
-            console.log("NFC 掃描已啟動");
+            
+            // 重要：一旦 NFC 成功啟動，設定為僅限 NFC 觸發
+            isNFCOnly = true; 
+            console.log("NFC 模式已啟動，螢幕點擊觸發已停用。");
 
-            ndef.addEventListener("reading", ({ message, serialNumber }) => {
-                console.log(`發現 NFC 卡片: ${serialNumber}`);
-                triggerCelebration(); // 感應到卡片即觸發
+            ndef.addEventListener("reading", () => {
+                triggerCelebration();
             });
         } catch (error) {
-            console.log("NFC 啟動失敗: " + error);
-            // 這裡不報錯，因為用戶可以用點擊的方式
+            console.log("NFC 啟動失敗或權限被拒絕，切換為點擊模式。");
+            isNFCOnly = false;
         }
-    } else {
-        console.log("此裝置不支援 Web NFC");
     }
 }
 
@@ -232,16 +232,24 @@ function createConfetti() {
     }
 }
 
-// 點擊觸發保留（作為替代方案）
-window.addEventListener('click', () => {
-    triggerCelebration();
+// 修改點擊事件：增加判斷條件
+window.addEventListener('click', (e) => {
+    // 如果是 NFC 模式，且點擊的不是下方的跳轉按鈕，就不觸發慶祝
+    if (isNFCOnly && e.target.id !== 'actionBtn') {
+        console.log("當前為 NFC 模式，請感應卡片");
+        return;
+    }
+    
+    // 如果不是 NFC 模式或是點擊了背景，才觸發
+    if (e.target.id !== 'actionBtn') {
+        triggerCelebration();
+    }
 });
 
 window.onload = () => { 
     createConfetti(); 
-    initNFC(); // 頁面載入後自動嘗試啟動 NFC 監聽
+    initNFC(); 
 };
-</script>
 </script>
 </body>
 </html>

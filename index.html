@@ -96,13 +96,13 @@ input, button, select, textarea { font-family: 'ChenYuluoyan', 'Microsoft JhengH
 </div>
 
 <script>
-// 全域變數
+// --- 全域變數 ---
 let team = [];
 let calling = false;
-let isStarted = false; // 紀錄是否已經進入遊戲
+let isStarted = false; // 紀錄是否已經進入遊戲狀態
 const names = { maoqiu: "毛球", hachu: "哈啾" };
 
-// 音效引擎
+// --- 音效引擎 ---
 const AudioEngine = {
   ctx: null,
   bgmStarted: false,
@@ -218,13 +218,17 @@ const AudioEngine = {
   }
 };
 
-// 重置遊戲函式
+// --- 重置與功能函式 ---
+
 function resetGame() {
-    // 透過重新整理網頁來實現最乾淨的 Reset
-    window.location.reload();
+    AudioEngine.playSuccessShort();
+    // 視覺反饋
+    document.body.style.backgroundColor = "white";
+    setTimeout(() => {
+        window.location.href = "index.html?t=" + Date.now();
+    }, 150);
 }
 
-// 建立背景星星
 function createStars() {
   const starsDiv = document.getElementById('stars');
   for(let i=0; i<100; i++) {
@@ -241,7 +245,6 @@ function createStars() {
 }
 createStars();
 
-// 驗證登入
 async function checkPass() {
   const input = document.getElementById("passInput");
   const overlay = document.getElementById("startOverlay");
@@ -251,7 +254,7 @@ async function checkPass() {
     overlay.style.opacity = "0";
     setTimeout(() => {
         overlay.style.display = "none";
-        isStarted = true; // 標記已開始遊戲
+        isStarted = true; // 正式標記已進入遊戲狀態
     }, 500);
     startStory();
   } else {
@@ -260,7 +263,6 @@ async function checkPass() {
   }
 }
 
-// 故事開始
 async function startStory() {
   AudioEngine.playTechBGM();
   const dialog = document.getElementById("dialog");
@@ -272,7 +274,7 @@ async function startStory() {
     await wait(600); dialog.innerHTML = ""; await wait(400);
   }
 
-  await typeText("我們要製作一個蛋糕🎂\n幫小豬慶祝生日", 80);
+  await typeText("我們要製作一個蛋糕🎂\n幫小豬慶慶祝生日", 80);
   await wait(1200);
   await typeText("現在要呼叫兩位重要隊員來完成!!!", 80);
   await wait(1200);
@@ -291,7 +293,6 @@ async function startStory() {
   }
 }
 
-// 打字效果
 async function typeText(text, speed) {
   const dialog = document.getElementById("dialog");
   dialog.innerHTML = "<span></span>";
@@ -304,7 +305,6 @@ async function typeText(text, speed) {
   }
 }
 
-// 掃描隊員卡片
 function scanCard(id) {
   if(!calling || team.includes(id)) return;
   team.push(id);
@@ -325,7 +325,6 @@ function scanCard(id) {
   }, 1200);
 }
 
-// 完成招募
 function finishEnroll() {
   const dialog = document.getElementById("dialog");
   dialog.innerHTML = "";
@@ -335,7 +334,6 @@ function finishEnroll() {
   }, 500);
 }
 
-// 跳轉下一頁
 function goNext() { 
   AudioEngine.playMissionStart(); 
   setTimeout(() => {
@@ -345,33 +343,39 @@ function goNext() {
 
 const wait = ms => new Promise(r => setTimeout(r, ms));
 
-// 初始化 NFC 監聽
+// --- NFC 核心邏輯 ---
+
 async function initNFC() {
   if ("NDEFReader" in window) {
     try {
       const ndef = new NDEFReader();
       await ndef.scan();
+      
       ndef.onreading = ({ message }) => {
         for (const record of message.records) {
           const textDecoder = new TextDecoder(record.encoding || "utf-8");
           const rawData = textDecoder.decode(record.data).toLowerCase();
 
-          // 【新增】檢查指揮官卡片 (含有 pig 字樣)
-          if (rawData.includes("pig")) {
-            // 如果已經進入遊戲(登入後)，掃描指揮官卡就重置
+          // 【檢測指揮官卡片】識別 URL 或關鍵字 pig
+          if (rawData.includes("index.html") || rawData.includes("pig")) {
             if (isStarted) {
-                resetGame();
+                resetGame(); // 遊戲中刷卡 = 重置
                 return;
+            } else {
+                // 未進入遊戲刷卡 = 自動填寫密碼 (選配)
+                document.getElementById("passInput").value = "0411";
             }
           }
 
-          // 隊員卡片偵測
+          // 【檢測隊員卡片】
           const matchedId = Object.keys(names).find(id => rawData.includes(id));
-          if (matchedId && !team.includes(matchedId) && calling) scanCard(matchedId);
+          if (matchedId && !team.includes(matchedId) && calling) {
+              scanCard(matchedId);
+          }
         }
       };
     } catch (e) { 
-        console.log("NFC Error: " + e);
+        console.warn("NFC Error: " + e);
         document.getElementById("testArea").style.display = "block"; 
     }
   } else { 
@@ -379,8 +383,15 @@ async function initNFC() {
   }
 }
 
-// 啟動監聽
+// 關鍵：監聽點擊來啟用 NFC 權限
+// 因為瀏覽器安全性要求，必須有使用者互動才能開啟 NFC
+document.addEventListener('click', () => {
+    initNFC();
+}, { once: false });
+
+// 頁面加載嘗試初始化
 initNFC();
+
 </script>
 </body>
 </html>

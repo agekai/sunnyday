@@ -203,15 +203,38 @@ async function initNFC() {
             const ndef = new NDEFReader();
             await ndef.scan();
             
-            // 重要：一旦 NFC 成功啟動，設定為僅限 NFC 觸發
             isNFCOnly = true; 
-            console.log("NFC 模式已啟動，螢幕點擊觸發已停用。");
+            console.log("NFC 模式已啟動，等待含有特定文字的卡片...");
 
-            ndef.addEventListener("reading", () => {
-                triggerCelebration();
+            ndef.addEventListener("reading", ({ message }) => {
+                const decoder = new TextDecoder();
+                let hasValidKey = false;
+
+                // 遍歷卡片中的所有紀錄
+                for (const record of message.records) {
+                    if (record.recordType === "text") {
+                        const text = decoder.decode(record.data);
+                        console.log(`讀取到文字內容: ${text}`);
+
+                        // 檢查內容是否包含 "mac" (不分大小寫)
+                        if (text.toLowerCase().trim() === "mac") {
+                            hasValidKey = true;
+                            break; 
+                        }
+                    }
+                }
+
+                if (hasValidKey) {
+                    console.log("密鑰正確！慶祝開始！");
+                    triggerCelebration();
+                } else {
+                    console.log("卡片內容不符，拒絕播放。");
+                    // 這裡可以選擇是否要有錯誤提示，例如讓背景閃一下紅光
+                }
             });
+
         } catch (error) {
-            console.log("NFC 啟動失敗或權限被拒絕，切換為點擊模式。");
+            console.log("NFC 啟動失敗: " + error);
             isNFCOnly = false;
         }
     }
